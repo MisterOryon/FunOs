@@ -1,17 +1,76 @@
-; Tell the assembler that the origin address (offset) is 0x7c00,
-; because the BIOS loads bootloader code at this part of memory.
-ORG 0x7c00
+ORG 0
 
 ; Tell the assembler that we are using 16-bit architecture.
 BITS 16
 
+; Make the start segment become 0x7c0 because the origin is 0.
+; It is important that the code segment is also changed to 0x7c0.
+jmp 0x7c0:start
+
 start:
+    ; Ensure that segment registers are correctly set to avoid problems if the BIOS does not set DS and ES to 0x7c0.
+    ; Clear interrupts because we do not want hardware interrupts to occur during the critical operation
+    ; of configuring the segment registers.
+    cli
+    ; We cannot put 0x7c0 directly into DS and ES.
+    ; We need to first load the value into the AX register ,this is required by the way the processor works.
+    mov ax, 0x7c0
+    mov ds, ax
+    mov es, ax
+    ; Set the stack segment to 0x00 (the default) and initialize the stack pointer to 0x7c00.
+    mov ax, 0x00
+    mov ss, ax
+    mov sp, 0x7c00
+    ; Enable interrupts.
+    sti
+
+    call setup_screen
+    call clean_screen
+
     ; Move the address of the message label into the SI register.
     mov si, message
     call print
 
     ; Jump to itself to ensure we don't execute unwanted instructions beyond the signature.
     jmp $
+
+setup_screen:
+    ; Ask the BIOS to switch to the video mode that supports an 80x25 screen.
+    ; Int 10/AH=00h (VIDEO - SET VIDEO MODE).
+    mov ah, 00h
+    mov al, 03h
+    int 0x10
+
+    ; Ask the BIOS to select display page one.
+    ; Int 10/AH=05h (VIDEO - SELECT ACTIVE DISPLAY PAGE).
+    mov ah, 05h
+    mov al, 00h
+    int 0x10
+
+    ret
+
+clean_screen:
+    ; Ask the BIOS to scroll up the screen to clear its contents.
+    ; Int 10/AH=06h (VIDEO - SCROLL UP WINDOW).
+    mov ah, 06h
+    ; Clear the entire screen.
+    mov al, 00h
+    ; Set white text color on a black background.
+    mov bh, 0x07
+    int 0x10
+
+    ; Ask the BIOS to reset the cursor position to 0,0 on page one.
+    ; Int 10/AH=02h (VIDEO - SET CURSOR POSITION).
+    mov ah, 02h
+    ; Page one.
+    mov bh, 00h
+    ; Row position.
+    mov dh, 00h
+    ; Column position.
+    mov dl, 00h
+    int 0x10
+
+    ret
 
 print:
 .loop:
@@ -32,7 +91,7 @@ print:
 
 print_char:
     ; Ask the BIOS to display a character on the screen.
-    ; INT 10/AH=0Eh (VIDEO - TELETYPE OUTPUT)
+    ; INT 10/AH=0Eh (VIDEO - TELETYPE OUTPUT).
     mov ah, 0eh
     ; Call BIOS function.
     int 0x10
