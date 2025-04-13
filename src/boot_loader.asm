@@ -3,11 +3,20 @@ ORG 0
 ; Tell the assembler that we are using 16-bit architecture.
 BITS 16
 
-; Make the start segment become 0x7c0 because the origin is 0.
-; It is important that the code segment is also changed to 0x7c0.
-jmp 0x7c0:start
+; The BPB (BIOS Parameter Block) is required by some computer BIOS.
+; The first 3 bytes always consist of a short jump followed by a NOP instruction.
+_start:
+    jmp short start
+    nop
+; Set the rest of the BPB parameters to 0.
+times 33 db 0
 
 start:
+    ; Make the start segment become 0x7c0 because the origin is 0.
+    ; It is important that the code segment is also changed to 0x7c0.
+    jmp 0x7c0:init
+
+init:
     ; Ensure that segment registers are correctly set to avoid problems if the BIOS does not set DS and ES to 0x7c0.
     ; Clear interrupts because we do not want hardware interrupts to occur during the critical operation
     ; of configuring the segment registers.
