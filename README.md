@@ -81,6 +81,60 @@ into account.
 Modern code running in real mode faces the same limitations as the old processors (e.g., 16-bit constraints, memory
 models, x86 assembly code, etc.).
 
+### Protected Mode
+
+Protected mode is a more advanced mode compared to real mode.
+It provides several features such as access to more memory (up to 4GB) and 32-bit support.  
+Protected mode also allows the following features:
+
+- **Memory Protection**: Each program has its own portion of memory, and the processor ensures that no program can
+  interfere with the memory of another.
+- **Virtual Memory**: Allows multiple programs to share the same virtual address space.
+  It also permits the extension of main memory by using disk space.
+- **Multitasking**: The processor can switch between different tasks, giving each task a slice of processor time.
+
+Switching to protected mode is a crucial step in the boot process as it enables these advanced features.
+
+#### Entering Protected Mode
+
+The general steps involved in the process are:
+
+1. **Disable Interrupts**: This is done because the Interrupt Vector Table (IVT) location and format change when moving
+   to protected mode.
+   If an interrupt occurs during the setup, the system could crash.
+2. **Set up a Global Descriptor Table (GDT)**: The GDT describes the memory segments, including the base address, size
+   limit, and access rights for each segment.
+3. **Load the GDT**: The GDT address must be loaded into the GDTR (Global Descriptor Table Register) using the `lgdt`
+   instruction.
+4. **Set the Protected Mode Bit**: In the CR0 (Control Register 0), the first bit (bit 0) must be set to 1 to enable
+   protected mode.
+5. **Perform a Far Jump**: A far jump is necessary to clear the prefetch queue and ensure that the processor starts
+   executing instructions in protected mode.
+   The CS (Code Segment) register is loaded with a selector from the GDT.
+6. **Set up Segment Registers**: The remaining segment registers (DS, SS, ES, FS, GS) are loaded with selectors from the
+   GDT.
+   The stack pointer (SP or ESP) is also set up at this time.
+7. **Enable Interrupts (if necessary)**: Once all the above steps are completed, interrupts can be re-enabled.
+
+#### Example Assembly Code to Enter Protected Mode:
+
+```asm
+cli                           ; Disable interrupts
+lgdt [gdt_descriptor]         ; Load the GDT into GDTR
+mov eax, cr0                  ; Load CR0 into EAX
+or eax, 1                     ; Set the protected mode bit (bit 0) in CR0
+mov cr0, eax                  ; Write CR0 to enable protected mode
+jmp CODE_SEG:next_instruction ; Perform a far jump to clear the prefetch queue
+
+next_instruction:
+mov ax, DATA_SEG           ; Load data segment selector from GDT
+mov ds, ax                 ; Set data segment register
+mov es, ax                 ; Set extra segment register
+mov ss, ax                 ; Set stack segment register
+mov esp, 0x200000          ; Set up the stack pointer
+sti                        ; Enable interrupts
+```
+
 #### Memory
 
 ##### Segment Registers
