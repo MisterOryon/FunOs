@@ -203,3 +203,24 @@ The equation to calculate the offset is: `interrupt_num * size_of_entry = offset
 | INT 0x0D  | General Protection Fault         |
 | INT 0x0F  | Reserved (Intel use only)        |
 | INT 0x10  | Coprocessor Error                |
+
+## Disk Access
+
+The BIOS interrupt `int 0x13` provides an interface in real mode to read and write to an HDD (hard disk drive).  
+At a low level, the disk is divided into sectors, which are typically 512 bytes in size, though some modern disks use
+larger sectors.  
+For an HDD, sectors are physically arranged in concentric circles called tracks.
+The disk is divided into smaller units called cylinders, heads, and sectors, which are used to address individual
+sectors.
+
+To read from the disk, CPU registers need to be set as follows:
+
+- **AH register**: The function number (`0x02` to read from the disk).
+- **AL register**: The number of sectors to read.
+- **CH register**: The cylinder number.
+- **CL register**: The sector number.
+- **DH register**: The head number.
+- **DL register**: The drive number (the first hard drive is typically `0x80`).
+- **ES:BX register**: The address of the buffer to store the data read from the disk.
+
+Writing to the disk is similar, but **AH** is set to `0x03`, and **ES:BX** points to the data to write.
