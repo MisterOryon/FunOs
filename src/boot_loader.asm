@@ -45,9 +45,31 @@ init:
     lea ax, [print]
     mov word[ss:0x200], ax
 
+    ; Set buffer address for data to be read ES:BX = 0x7e00 (0x7c0 * 16 = 0x7c00 + 0x200).
+    mov bx, 0x0200
+    ; Request the BIOS to read one sector from cylinder 0, head 0, sector 2 on the first hard drive into 0x7e00.
+    ; INT 13h / AH = 02h (DISK - READ SECTOR(S) INTO MEMORY).
+    mov ah, 02h
+    ; Read one sector.
+    mov al, 0x01
+    ; Specify cylinder zero.
+    mov ch, 0x00
+    ; Specify sector two.
+    mov cl, 0x02
+    ; Specify head zero.
+    mov dh, 0x00
+    ; Specify the primary hard drive (typically 0x80 for the first hard drive).
+    mov dl, 0x80
+    ; Call BIOS interrupt to execute the disk read.
+    int 0x13
+
     ; Move the address of the message label into the SI register.
     mov si, message
-    ; Call our print interrupt
+    ; Call our print interrupt.
+    int 0x80
+
+    ; Print BX buffer.
+    mov si, 0x200
     int 0x80
 
     ; Jump to itself to ensure we don't execute unwanted instructions beyond the signature.
@@ -117,9 +139,9 @@ print_char:
     ; Return from the subroutine.
     ret
 
-; Create a label called message that contains the string "Hello Fun OS",
+; Create a label called message that contains the string "Data on sector 2:",
 ; followed by the null terminator (0) at the end.
-message: db "Hello Fun OS", 0
+message: db "Data on sector 2:", 0
 
 ; The following two instructions are only used to create the boot signature.
 ; Boot signature 0x55AA on the last two bytes of the sector.

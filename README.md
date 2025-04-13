@@ -14,13 +14,19 @@ Run the following command to install the required tools:
 
 ### Bootloader
 
-To build the bootloader, run the following command: `nasm -f bin src/boot_loader.asm -o dist/boot_loader.bin`.
-The size of the bootloader is always 512 bytes.
+To build the bootloader, run the following commands:
+
+- `nasm -f bin src/boot_loader.asm -o dist/boot_loader.bin`.
+- `nasm -f bin src/data.asm -o dist/data.bin`
+- `dd if=./dist/boot_loader.bin of=./dist/os.bin`
+- `dd if=./dist/data.bin conv=notrunc oflag=append of=./dist/os.bin`
+
+The size of the bootloader is always 1024 bytes.
 To view the disassembly output, you can run: `ndisasm ./dist/boot_loader.bin`.
 
 ## Run
 
-To run FunOS, use the following command: `qemu-system-x86_64 -hda ./dist/boot_loader.bin`
+To run FunOS, use the following command: `qemu-system-x86_64 -hda ./dist/os.bin`
 
 ## Booted System
 
