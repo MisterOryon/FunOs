@@ -180,3 +180,5 @@ any BIOS routines.
 The IVT (Interrupt Vector Table) is a table residing in memory at address `0x0000` in real mode.
 It contains 256 entries, each 4 bytes long (2 bytes for the offset followed by 2 bytes for the segment).
 The total size is 1 KB (1024 bytes), and each entry points to an ISR (a piece of code).
+
+The equation to calculate the offset is: `interrupt_num * size_of_entry = offset to edit`

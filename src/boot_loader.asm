@@ -36,9 +36,19 @@ init:
     call setup_screen
     call clean_screen
 
+    ; Set up interrupt 0x80 to print the string pointed to by the SI register.
+    ; Set the segment of interrupt 0x80 with our code segment address.
+    ; Since the SS segment is equal to zero, the absolute address is calculated as 0x00 * 16 + 0x202 = 0x202.
+    mov ax, 0x7c0
+    mov word[ss:0x202], ax
+    ; Calculate the offset of 'print' and set the offset of interrupt 0x80 with the 'print' offset.
+    lea ax, [print]
+    mov word[ss:0x200], ax
+
     ; Move the address of the message label into the SI register.
     mov si, message
-    call print
+    ; Call our print interrupt
+    int 0x80
 
     ; Jump to itself to ensure we don't execute unwanted instructions beyond the signature.
     jmp $
@@ -95,8 +105,8 @@ print:
     ; Loop again to display the next character.
     jmp .loop
 .done:
-    ; Return from the subroutine.
-    ret
+    ; Return from interrupt routine ISR.
+    iret
 
 print_char:
     ; Ask the BIOS to display a character on the screen.
