@@ -182,3 +182,24 @@ It contains 256 entries, each 4 bytes long (2 bytes for the offset followed by 2
 The total size is 1 KB (1024 bytes), and each entry points to an ISR (a piece of code).
 
 The equation to calculate the offset is: `interrupt_num * size_of_entry = offset to edit`
+
+### Real Mode Exception Interrupts
+
+| Interrupt | Description                      |
+|-----------|----------------------------------|
+| INT 0x00  | Divide by zero                   |
+| INT 0x01  | Single step (Debug)              |
+| INT 0x02  | Non-maskable interrupt           |
+| INT 0x03  | Breakpoint (Debug)               |
+| INT 0x04  | Overflow (INTO instruction)      |
+| INT 0x05  | Bounds check (BOUND instruction) |
+| INT 0x06  | Invalid Opcode                   |
+| INT 0x07  | Coprocessor not available        |
+| INT 0x08  | Double Fault                     |
+| INT 0x09  | Coprocessor Segment Overrun      |
+| INT 0x0A  | Invalid Task State Segment       |
+| INT 0x0B  | Segment not present              |
+| INT 0x0C  | Stack-segment fault              |
+| INT 0x0D  | General Protection Fault         |
+| INT 0x0F  | Reserved (Intel use only)        |
+| INT 0x10  | Coprocessor Error                |
