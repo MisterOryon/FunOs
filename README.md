@@ -4,11 +4,12 @@
 
 - `nasm`
 - `qemu`
+- `gdb`
 
 ### On Arch Linux
 
 Run the following command to install the required tools:
-`pacman -Syu nasm qemu-full`
+`pacman -Syu nasm qemu-full gdb`
 
 ## Build
 
@@ -17,16 +18,54 @@ Run the following command to install the required tools:
 To build the bootloader, run the following commands:
 
 - `nasm -f bin src/boot_loader.asm -o dist/boot_loader.bin`.
-- `nasm -f bin src/data.asm -o dist/data.bin`
-- `dd if=./dist/boot_loader.bin of=./dist/os.bin`
-- `dd if=./dist/data.bin conv=notrunc oflag=append of=./dist/os.bin`
 
 The size of the bootloader is always 1024 bytes.
 To view the disassembly output, you can run: `ndisasm ./dist/boot_loader.bin`.
 
 ## Run
 
-To run FunOS, use the following command: `qemu-system-x86_64 -hda ./dist/os.bin`
+To run FunOS, use the following command: `qemu-system-x86_64 -hda ./dist/boot_loader.bin`
+
+## Run in Debugging Environment
+
+To run FunOS in a debugging environment, use the following command:
+
+```bash
+qemu-system-x86_64 -s -S -hda ./dist/boot_loader.bin
+```
+
+- **`-s`**: Shorthand for `-gdb tcp::1234`, which starts a GDB server listening on TCP port 1234.
+- **`-S`**: Makes QEMU stop execution at the very beginning until you tell it to continue using GDB.
+
+This allows you to connect a debugger like GDB to debug FunOS step-by-step.
+
+### GDB
+
+To connect to QEMU with GDB, issue the following command inside GDB:
+
+```bash
+target remote localhost:1234
+```
+
+#### Setting Breakpoints
+
+Place your breakpoint with the command:
+
+```bash
+break *<addr>
+```
+
+In FunOS, the following address is interesting:
+
+- **0x7c00**: This is the memory address where the bootloader is loaded.
+
+#### Debugging in GDB
+
+1. After placing your breakpoint, use the `continue` command to start execution.
+2. Use the `layout asm` command to view the assembly layout.
+3. To step through the code instruction by instruction, use the `stepi` command to move to the next instruction.
+
+This approach allows you to debug and understand the step-by-step execution of FunOS.
 
 ## Booted System
 
@@ -135,9 +174,9 @@ mov esp, 0x200000          ; Set up the stack pointer
 sti                        ; Enable interrupts
 ```
 
-#### Memory
+## Memory
 
-##### Segment Registers
+### Segment Registers
 
 In real mode or with the Intel 8086 processor, you have the following segment registers:
 
@@ -146,7 +185,7 @@ In real mode or with the Intel 8086 processor, you have the following segment re
 - **DS (Data Segment)**
 - **ES (Extra Segment)**
 
-##### Calculating Absolute Offset
+#### Calculating Absolute Offset
 
 The absolute position in RAM can be calculated by taking the segment register, multiplying it by 16, and adding the
 offset.  
@@ -154,7 +193,7 @@ This combination allows addressing up to one megabyte of memory.
 
 Note that the offset is defined by the `ORG` (Assembly Origin) directive in assembly code.
 
-##### Instructions Use Different Segment Registers
+#### Instructions Use Different Segment Registers
 
 The `lodsb` instruction uses the `DS:SI` register combination—more precisely, it uses `DS` as the segment register and
 `SI` as the offset register.
@@ -176,7 +215,7 @@ mov si, 0x1F
 lodsb
 ```
 
-##### Programs Can Be Loaded in Different Areas of Memory
+#### Programs Can Be Loaded in Different Areas of Memory
 
 You can swap the segment register when switching to another process, and by restoring the register values of a process,
 the program resumes as if it had never switched.
@@ -186,7 +225,7 @@ For example:
 - **Program 1** is loaded at address 0x7C00 and uses segment 0x7C0 for all its segment registers.
 - **Program 2** is loaded at address 0x7D00 and uses segment 0x7D0 for all its segment registers.
 
-##### Multiple Segments Are Available Using Segment Registers
+#### Multiple Segments Are Available Using Segment Registers
 
 Examples of reading memory with different segment registers:
 
@@ -199,7 +238,7 @@ mov al, [de:826]
 mov al, [ss:231]
 ```
 
-##### Stack Segment
+#### Stack Segment
 
 The stack pointer (SP) points to a location in memory, and stack operations are based on the stack segment (SS) and the
 stack pointer.  
@@ -210,6 +249,73 @@ For example:
 - We start with `SP` (Stack Pointer) at 0x7C00 and `SS` (Stack Segment) at 0x00.
 - When using `push 0xffff`, we decrement the stack pointer by 2 because we push two bytes onto the stack.
 - Now, the stack pointer becomes 0x7BFE, and 0xFFFF is stored in memory at addresses 0x7BFE and 0x7BFF.
+
+### Global Descriptor Table (GDT)
+
+When protected mode is enabled, the processor uses the Global Descriptor Table (GDT) to define the characteristics of
+the segments it will use.
+Each entry in the GDT is a segment descriptor that provides information about a segment, such as its size, location, and
+access rights.
+The first entry in the GDT (Entry 0) should always be null and later entries should be used instead.
+
+#### GDT Descriptors
+
+Each descriptor in the GDT is 8 bytes long and follows this format:
+
+| 0:15 Lim. L | 16:31 B. L | 32:39 B. M | 40:47 Acc. B | 48:51 Lim. H | 52:55 Flg | 56:63 B. H |
+|-------------|------------|------------|--------------|--------------|-----------|------------|
+| `0x0000`    | `0x0000`   | `0x00`     | `0x00`       | `0x0`        | `0x0`     | `0x00`     |
+
+##### Descriptor Fields Explained
+
+1. **Segment Limit**:
+    - This 20-bit field is split between bits 0–15 (`Lim. L`) and bits 48–51 (`Lim. H`).
+    - It specifies the size of the segment. The actual size is computed as:
+      ``` 
+      (Segment Limit + 1) * Granularity
+      ```
+2. **Base Address**:
+    - This is a 32-bit field that specifies the linear address where the segment begins.
+    - It is split between `B. L` (bits 16–31), `B. M` (bits 32–39), and `B. H` (bits 56–63).
+3. **Access Byte**:  
+   This byte specifies the type of segment, its privilege level, and other characteristics. It is divided into several
+   bitfields:
+    - **Bit 0**: Accessed bit.
+    - **Bit 1**: Readable bit for a code segment or writable bit for a data segment.
+    - **Bit 2**: Direction bit for data selectors or conforming bit for code selectors.
+    - **Bit 3**: Executable bit. If set, the segment is a code segment.
+    - **Bit 4**: Descriptor bit. Should be set to 1 for code or data segments.
+    - **Bits 6-5**: Descriptor Privilege Level (DPL).
+      Specify the privilege level of the segment, ranging from 0 (highest privilege) to 3 (lowest privilege).
+    - **Bit 7**: Segment Present (P) bit. Should be set to 1 for valid segments.
+4. **Flags**:
+    - These include the Granularity (G) bit (bit 3) and the Size (S) bit (bit 2).
+    - The **Granularity bit (G, bit 3)**:
+        - When set to 1, the segment limit is specified in 4 KB blocks instead of bytes.
+        - When set to 0, the limit is in bytes.
+    - The **Size bit (S, bit 2)**:
+        - Specifies whether the segment uses 32-bit protected mode (1) or 16-bit modes (0).
+
+##### Example: Writing a Descriptor in Assembly
+
+```asm
+dw 0xffff          ; Segment Limit (Low 16 bits)
+dw 0x0000          ; Base Address (Low 16 bits)
+db 0x00            ; Base Address (Middle 8 bits)
+db 0x9a            ; Access Byte (code segment, present, privilege 0, executable)
+db 11001111b       ; Flags (Granularity: 1, 32-bit size: 1) + Segment Limit (High 4 bits)
+db 0x00            ; Base Address (High 8 bits)
+```
+
+#### Using the GDT
+
+To utilize the GDT, we need to set the GDTR register with the `lgdt` instruction.
+When the processor shifts into protected mode, each of these segment registers (DS, ES, ...) is transformed into a
+segment selector that points to an index within the GDT.
+After that, the absolute address is calculated by following the GDT parameters.
+
+Note that the GDT descriptor passed to the `lgdt` instruction must specify the size of the GDT and the starting point of
+the GDT.
 
 ## Interrupts
 

@@ -1,7 +1,8 @@
-ORG 0
-
-; Tell the assembler that we are using 16-bit architecture.
+ORG 0x7c00
 BITS 16
+
+CODE_SEG equ gdt_code - gdt_start
+DATA_SEG equ gdt_data - gdt_start
 
 ; The BPB (BIOS Parameter Block) is required by some computer BIOS.
 ; The first 3 bytes always consist of a short jump followed by a NOP instruction.
@@ -12,141 +13,109 @@ _start:
 times 33 db 0
 
 start:
-    ; Make the start segment become 0x7c0 because the origin is 0.
-    ; It is important that the code segment is also changed to 0x7c0.
-    jmp 0x7c0:init
+    ; It is important that the code segment is changed to 0x00 because the origin is 0x7c00.
+    jmp 0:init
 
 init:
-    ; Ensure that segment registers are correctly set to avoid problems if the BIOS does not set DS and ES to 0x7c0.
+    ; Ensure that the segment registers are properly set to avoid problems if the BIOS does not set them correctly.
+    ; Since our origin is 0x7c00, all our segment registers should initially be zero.
     ; Clear interrupts because we do not want hardware interrupts to occur during the critical operation
     ; of configuring the segment registers.
     cli
-    ; We cannot put 0x7c0 directly into DS and ES.
-    ; We need to first load the value into the AX register ,this is required by the way the processor works.
-    mov ax, 0x7c0
+    ; We cannot put 0x00 directly into DS and ES.
+    ; We need to first load the value into the AX register, this is required by the way the processor works.
+    mov ax, 0x00
     mov ds, ax
     mov es, ax
     ; Set the stack segment to 0x00 (the default) and initialize the stack pointer to 0x7c00.
-    mov ax, 0x00
     mov ss, ax
     mov sp, 0x7c00
     ; Enable interrupts.
     sti
+.load_protected:
+    cli
+    ; Load the GDT.
+    lgdt [gdt_descriptor]
+    ; Get the current configuration in the CR0 register.
+    mov eax, cr0
+    ; Set the first bit of CR0 to enable protected mode.
+    or eax, 0x1
+    ; Store the new configuration in the CR0 register.
+    mov cr0, eax
+    ; Perform a long jump to ensure that prefetching is cleared, and the next instruction is executed in protected mode.
+    ; Also, set the CS register to use the CODE_SEG entry of the GDT.
+    jmp CODE_SEG:load32
 
-    call setup_screen
-    call clean_screen
+; GDT
+gdt_start:
+gdt_null:
+    dd 0x0
+    dd 0x0
 
-    ; Set up interrupt 0x80 to print the string pointed to by the SI register.
-    ; Set the segment of interrupt 0x80 with our code segment address.
-    ; Since the SS segment is equal to zero, the absolute address is calculated as 0x00 * 16 + 0x202 = 0x202.
-    mov ax, 0x7c0
-    mov word[ss:0x202], ax
-    ; Calculate the offset of 'print' and set the offset of interrupt 0x80 with the 'print' offset.
-    lea ax, [print]
-    mov word[ss:0x200], ax
+; CS should point to this GDT entry.
+; Lim 0xFFFFF
+; Base 0x00000000
+; Acc 0x9A (1001 1010)
+; - Readable code segment
+; - Executable segment
+; Flg 0xC (1100)
+gdt_code:
+    ; 0-15: Limit low
+    dw 0xffff
+    ; 16-31: Base low
+    dw 0
+    ; 32-39: Base middle
+    db 0
+    ; 40-47: Access byte
+    db 0x9a
+    ; 48-55: Limit high and flags
+    db 11001111b
+    ; 56-63: Base high
+    db 0
 
-    ; Set buffer address for data to be read ES:BX = 0x7e00 (0x7c0 * 16 = 0x7c00 + 0x200).
-    mov bx, 0x0200
-    ; Request the BIOS to read one sector from cylinder 0, head 0, sector 2 on the first hard drive into 0x7e00.
-    ; INT 13h / AH = 02h (DISK - READ SECTOR(S) INTO MEMORY).
-    mov ah, 02h
-    ; Read one sector.
-    mov al, 0x01
-    ; Specify cylinder zero.
-    mov ch, 0x00
-    ; Specify sector two.
-    mov cl, 0x02
-    ; Specify head zero.
-    mov dh, 0x00
-    ; Specify the primary hard drive (typically 0x80 for the first hard drive).
-    mov dl, 0x80
-    ; Call BIOS interrupt to execute the disk read.
-    int 0x13
+; DS, SS, ES, FS, and GS should point to this GDT entry.
+; Lim 0xFFFFF
+; Base 0x00000000
+; Acc 0x92 (1001 0010)
+; - Writable data segment
+; Flg 0xC (1100)
+gdt_data:
+    ; 0-15: Limit low
+    dw 0xffff
+    ; 16-31: Base low
+    dw 0
+    ; 32-39: Base middle
+    db 0
+    ; 40-47: Access byte
+    db 0x92
+    ; 48-55: Limit high and flags
+    db 11001111b
+    ; 56-63: Base high
+    db 0
 
-    ; Move the address of the message label into the SI register.
-    mov si, message
-    ; Call our print interrupt.
-    int 0x80
+gdt_end:
 
-    ; Print BX buffer.
-    mov si, 0x200
-    int 0x80
+; Provide the size and starting address of the GDT.
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
 
-    ; Jump to itself to ensure we don't execute unwanted instructions beyond the signature.
+[BITS 32]
+load32:
+    mov ax, DATA_SEG
+    ; Set up the DS, SS, ES, FS, and GS segments.
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    ; Set up the stack.
+    mov ss, ax
+    mov ebp, 0x00200000
+    mov esp, ebp
+    ; Infinite loop to stop further execution.
     jmp $
 
-setup_screen:
-    ; Ask the BIOS to switch to the video mode that supports an 80x25 screen.
-    ; Int 10/AH=00h (VIDEO - SET VIDEO MODE).
-    mov ah, 00h
-    mov al, 03h
-    int 0x10
-
-    ; Ask the BIOS to select display page one.
-    ; Int 10/AH=05h (VIDEO - SELECT ACTIVE DISPLAY PAGE).
-    mov ah, 05h
-    mov al, 00h
-    int 0x10
-
-    ret
-
-clean_screen:
-    ; Ask the BIOS to scroll up the screen to clear its contents.
-    ; Int 10/AH=06h (VIDEO - SCROLL UP WINDOW).
-    mov ah, 06h
-    ; Clear the entire screen.
-    mov al, 00h
-    ; Set white text color on a black background.
-    mov bh, 0x07
-    int 0x10
-
-    ; Ask the BIOS to reset the cursor position to 0,0 on page one.
-    ; Int 10/AH=02h (VIDEO - SET CURSOR POSITION).
-    mov ah, 02h
-    ; Page one.
-    mov bh, 00h
-    ; Row position.
-    mov dh, 00h
-    ; Column position.
-    mov dl, 00h
-    int 0x10
-
-    ret
-
-print:
-.loop:
-    ; Load the character that the SI register is pointing to into the AL register;
-    ; then increment the SI register so it points to the next character.
-    lodsb
-    ; Compare AL to 0.
-    cmp al, 0
-    ; If equal, jump to done (JE for jump if equal).
-    je .done
-    ; Otherwise, call print_char.
-    call print_char
-    ; Loop again to display the next character.
-    jmp .loop
-.done:
-    ; Return from interrupt routine ISR.
-    iret
-
-print_char:
-    ; Ask the BIOS to display a character on the screen.
-    ; INT 10/AH=0Eh (VIDEO - TELETYPE OUTPUT).
-    mov ah, 0eh
-    ; Call BIOS function.
-    int 0x10
-    ; Return from the subroutine.
-    ret
-
-; Create a label called message that contains the string "Data on sector 2:",
-; followed by the null terminator (0) at the end.
-message: db "Data on sector 2:", 0
-
-; The following two instructions are only used to create the boot signature.
-; Boot signature 0x55AA on the last two bytes of the sector.
-; Fill the rest of the 510 bytes of data by padding unused bytes with zeros.
+; Fill remaining bytes up to 510 with 0.
 times 510 - ($ - $$) db 0
-; Intel machines are little-endian, so bytes get flipped when working with words.
-; (Word is assembled with "dw").
+; Boot signature.
 dw 0xAA55
