@@ -441,3 +441,21 @@ Explanation:
   followed by `0xAA`.
   This is located at the last two bytes of the 512-byte MBR sector, as required by the BIOS.
 
+## Protection Rings in 32-bit Protected Mode
+
+Four privilege levels are present in 32-bit protected mode, known as protection rings.
+These levels are utilized as follows:
+
+- **Ring 0**:  
+  This is the kernel level and the most privileged ring.
+  It allows direct access to physical hardware, such as memory and I/O operations.
+
+- **Ring 1 and Ring 2**:  
+  These are intermediate levels that typically contain device drivers and other critical services.
+  They need more privileges than user applications but should not have full access to the kernel.
+
+- **Ring 3**:  
+  This is the least privileged level, where user-mode applications reside.
+  Applications request resources and services through system calls to interact with the kernel.
+
+In practice, most modern operating systems only use **Ring 0** (kernel mode) and **Ring 3** (user mode).
