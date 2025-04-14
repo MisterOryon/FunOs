@@ -5,33 +5,32 @@
 - `nasm`
 - `qemu`
 - `gdb`
+- `make`
 
 ### On Arch Linux
 
 Run the following command to install the required tools:
-`pacman -Syu nasm qemu-full gdb`
+`pacman -Syu nasm qemu-full gdb make`
 
 ## Build
 
+To build FunOs for x86 run `make`.
+
 ### Bootloader
 
-To build the bootloader, run the following commands:
-
-- `nasm -f bin src/boot_loader.asm -o dist/boot_loader.bin`.
-
-The size of the bootloader is always 1024 bytes.
-To view the disassembly output, you can run: `ndisasm ./dist/boot_loader.bin`.
+The size of the bootloader is always 512 bytes.
+To view the disassembly output, you can run: `ndisasm ./bin/x86_boot_loader.bin`.
 
 ## Run
 
-To run FunOS, use the following command: `qemu-system-x86_64 -hda ./dist/boot_loader.bin`
+To run FunOS, use the following command: `qemu-system-x86_64 -hda ./bin/x86_boot_loader.bin`
 
 ## Run in Debugging Environment
 
 To run FunOS in a debugging environment, use the following command:
 
 ```bash
-qemu-system-x86_64 -s -S -hda ./dist/boot_loader.bin
+qemu-system-x86_64 -s -S -hda ./bin/x86_boot_loader.bin
 ```
 
 - **`-s`**: Shorthand for `-gdb tcp::1234`, which starts a GDB server listening on TCP port 1234.
