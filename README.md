@@ -173,6 +173,22 @@ mov esp, 0x200000          ; Set up the stack pointer
 sti                        ; Enable interrupts
 ```
 
+#### Enabling the A20 Line
+
+The A20 line controls whether the CPU can address memory beyond the 1 MB boundary.
+Disabling it restricts memory addressing to 20 bits (real mode), while enabling it allows access to all memory supported
+by the CPU.
+
+To access all available memory (4 GB) beyond the 1 MB limit of real mode, we need to enable the A20 line.
+The following assembly code reads the content of port `0x92` (System Control Port A),
+enables the second bit (responsible for controlling the A20 line), and writes the new contents back to port `0x92`:
+
+```asm
+in al, 0x92         ; Read the value from port 0x92 into the AL register
+or al, 2            ; Enable the second bit (A20 line)
+out 0x92, al        ; Write the updated value back to port 0x92
+```
+
 ## Memory
 
 ### Segment Registers

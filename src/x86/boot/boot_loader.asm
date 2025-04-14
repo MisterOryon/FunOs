@@ -112,8 +112,15 @@ load32:
     mov ss, ax
     mov ebp, 0x00200000
     mov esp, ebp
+
+    ; Enable the A20 line
+    in al, 0x92
+    or al, 2
+    out 0x92, al
+
     ; Infinite loop to stop further execution.
     jmp $
+
 
 ; Fill remaining bytes up to 510 with 0.
 times 510 - ($ - $$) db 0
