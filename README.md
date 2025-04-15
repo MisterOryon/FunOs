@@ -200,6 +200,10 @@ In real mode or with the Intel 8086 processor, you have the following segment re
 - **DS (Data Segment)**
 - **ES (Extra Segment)**
 
+In protected mode, additional segment registers `FS` and `GS` are available.
+The stack pointer (SP) is extended to **ESP** (Extended Stack Pointer) in 32-bit mode,
+providing access to a larger address space.
+
 #### Calculating Absolute Offset
 
 The absolute position in RAM can be calculated by taking the segment register, multiplying it by 16, and adding the
