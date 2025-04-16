@@ -105,7 +105,7 @@ gdt_descriptor:
 
 [BITS 32]
 load32:
-    ; Enable the A20 line
+    ; Enable the A20 line.
     in al, 0x92
     or al, 2
     out 0x92, al
@@ -134,8 +134,8 @@ load32:
     ; This ensures that the CS register becomes the code selector specified in the GDT.
     jmp CODE_SEG:0x00100000
 
-; eax: Starting sector
-; ecx: Number of sectors to read
+; eax: Starting sector.
+; ecx: Number of sectors to read.
 ; edi: Address to store the read data.
 ata_lba_read:
     ; Save the value of EAX (logical block address - LBA) into EBX for later use.

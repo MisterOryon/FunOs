@@ -5,7 +5,7 @@ CODE_SEG equ 0x08
 DATA_SEG equ 0x10
 
 _start:
-    ; Enable the A20 line
+    ; Enable the A20 line.
     in al, 0x92
     or al, 2
     out 0x92, al
@@ -23,5 +23,5 @@ _start:
 
     jmp $
 
-; Fill remaining bytes up to 512 with 0.
+; Fill the remaining bytes up to 512 with zeros.
 times 512 - ($ - $$) db 0
