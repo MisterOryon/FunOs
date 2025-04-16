@@ -6,31 +6,76 @@
 - `qemu`
 - `gdb`
 - `make`
+- `cross compiler`
 
 ### On Arch Linux
 
 Run the following command to install the required tools:
-`pacman -Syu nasm qemu-full gdb make`
+`pacman -Syu nasm qemu-full gdb make base-devel gmp libmpc mpfr`
+
+#### Setting Up the Cross-Compiler
+
+**Download the following archives:**
+
+- `gcc-14.2.0`
+- `binutils-2.44`
+
+1. **Set environment variables for the cross-compiler:**
+   ```bash
+   export PREFIX="$HOME/opt/cross"
+   export TARGET=i686-elf
+   export PATH="$PREFIX/bin:$PATH"
+   ```
+
+2. **Build and install Binutils:**
+   ```bash
+   cd $HOME/src
+   mkdir build-binutils
+   cd build-binutils
+   ../binutils-2.44/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
+   make
+   make install
+   ```
+
+**Check if Binutils is correctly installed:**
+
+```bash
+cd $HOME/src
+which -- $TARGET-as || echo "$TARGET-as is not in the PATH"
+```
+
+3. **Build and install GCC:**
+
+   ```bash
+   mkdir build-gcc
+   cd build-gcc
+   ../gcc-14.2.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
+   make all-gcc
+   make all-target-libgcc
+   make install-gcc
+   make install-target-libgcc
+   ```
+
+4. **Verify the cross-compiler installation:**
+
+   ```bash
+   $HOME/opt/cross/bin/$TARGET-gcc --version
+   ```
 
 ## Build
 
-To build FunOs for x86 run `make`.
-
-### Bootloader
-
-The size of the bootloader is always 512 bytes.
-To view the disassembly output, you can run: `ndisasm ./bin/x86_boot_loader.bin`.
+To build FunOs for x86 run `./build.sh`.
 
 ## Run
 
-To run FunOS, use the following command: `qemu-system-x86_64 -hda ./bin/x86_boot_loader.bin`
+To run FunOS, use the following command: `qemu-system-x86_64 -hda ./bin/os.bin`
 
 ## Run in Debugging Environment
 
 To run FunOS in a debugging environment, use the following command:
 
 ```bash
-qemu-system-x86_64 -s -S -hda ./bin/x86_boot_loader.bin
+qemu-system-x86_64 -s -S -hda ./bin/os.bin
 ```
 
 - **`-s`**: Shorthand for `-gdb tcp::1234`, which starts a GDB server listening on TCP port 1234.
@@ -39,6 +84,12 @@ qemu-system-x86_64 -s -S -hda ./bin/x86_boot_loader.bin
 This allows you to connect a debugger like GDB to debug FunOS step-by-step.
 
 ### GDB
+
+To load debug information, use the following command in GDB:
+
+```bash
+add-symbol-file build/kernelfull.o 0x100000
+```
 
 To connect to QEMU with GDB, issue the following command inside GDB:
 
@@ -57,6 +108,7 @@ break *<addr>
 In FunOS, the following address is interesting:
 
 - **0x7c00**: This is the memory address where the bootloader is loaded.
+- **_start**: The entry point of `kernel.asm` (main function).
 
 #### Debugging in GDB
 
