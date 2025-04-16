@@ -15,19 +15,18 @@ Run the following command to install the required tools:
 
 #### Setting Up the Cross-Compiler
 
-**Download the following archives:**
+1. **Download the following archives:**
+    - `gcc-14.2.0`
+    - `binutils-2.44`
 
-- `gcc-14.2.0`
-- `binutils-2.44`
-
-1. **Set environment variables for the cross-compiler:**
+2. **Set environment variables for the cross-compiler:**
    ```bash
    export PREFIX="$HOME/opt/cross"
    export TARGET=i686-elf
    export PATH="$PREFIX/bin:$PATH"
    ```
 
-2. **Build and install Binutils:**
+3. **Build and install Binutils:**
    ```bash
    cd $HOME/src
    mkdir build-binutils
@@ -37,14 +36,14 @@ Run the following command to install the required tools:
    make install
    ```
 
-**Check if Binutils is correctly installed:**
+   **Check if Binutils is correctly installed:**
 
-```bash
-cd $HOME/src
-which -- $TARGET-as || echo "$TARGET-as is not in the PATH"
-```
+    ```bash
+    cd $HOME/src
+    which -- $TARGET-as || echo "$TARGET-as is not in the PATH"
+    ```
 
-3. **Build and install GCC:**
+4. **Build and install GCC:**
 
    ```bash
    mkdir build-gcc
@@ -56,7 +55,7 @@ which -- $TARGET-as || echo "$TARGET-as is not in the PATH"
    make install-target-libgcc
    ```
 
-4. **Verify the cross-compiler installation:**
+5. **Verify the cross-compiler installation:**
 
    ```bash
    $HOME/opt/cross/bin/$TARGET-gcc --version
