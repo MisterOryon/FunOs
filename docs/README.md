@@ -1,4 +1,18 @@
-# Learning
+# FunOS docs
+
+The `docs` folder contains all the information about how FunOS works, except for the resources within the `learning`
+folder (see [Learning docs](#learning-docs) for more details).
+
+## x86 Architecture
+
+The `x86` folder provides detailed information specific to the x86 architecture.
+
+### Boot Sequence
+
+Detailed information about how FunOS boots on x86 architecture can be found in
+the [boot sequence documentation](x86/boot.md).
+
+# Learning docs
 
 The **learning folder** contains a compilation of information that I use to build **FunOS**.
 It is not a formal documentation about how computers work but rather a place where I store notes and important concepts
