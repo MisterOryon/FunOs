@@ -1,0 +1,46 @@
+# Learning
+
+The **learning folder** contains a compilation of information that I use to build **FunOS**.
+It is not a formal documentation about how computers work but rather a place where I store notes and important concepts
+that I need to keep in mind for reference.
+
+## x86 Architecture
+
+### BIOS Formats
+
+- **[MBR](learning/x86/bios.md#mbr-master-boot-record)**: Master Boot Record, an important structure for booting
+  processes in BIOS.
+
+### Boot System
+
+- **[Bootloader](learning/x86/bootloader.md)**: Basics of the bootloader and its role in the startup process.
+
+### Disk Access
+
+- **[BIOS Call](learning/x86/bios.md#disk-access)**: How the BIOS handles reading from disks.
+- **[ATA Driver](learning/x86/ata.md)**: Details about the driver for ATA (Advanced Technology Attachment) storage
+  devices.
+
+### Processor Modes
+
+- **[Real Mode](learning/x86/real_mode.md)**: Overview of processor operations in Real Mode.
+- **[Protected Mode](learning/x86/protected_mode.md)**: Overview of processor operations in Protected Mode.
+
+### Memory
+
+- **[Segment](learning/x86/real_mode.md#memory)**: Memory segmentation in Real Mode.
+- **[GDT](learning/x86/protected_mode.md#memory)**: Global Descriptor Table used in Protected Mode.
+
+### Interrupts
+
+- **[IVT](learning/x86/interrupts.md#ivt)**: The Interrupt Vector Table used for handling system interrupts.
+- **[Real Mode Exception Interrupts](learning/x86/real_mode.md)**: Exception handling in Real Mode.
+
+### Protection Rings
+
+- **[32-bit Rings](learning/x86/protected_mode.md#protection-rings-in-32-bit-protected-mode)**: The concept of rings,
+  including privilege levels in 32-bit Protected Mode.
+
+### CPU Specification
+
+- **[Registers](learning/x86/registers.md)**: Details about CPU registers and their role in executing instructions.
