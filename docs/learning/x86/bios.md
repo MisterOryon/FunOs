@@ -51,6 +51,20 @@ Explanation:
   followed by `0xAA`.
   This is located at the last two bytes of the 512-byte MBR sector, as required by the BIOS.
 
+## BPB (BIOS Parameter Block)
+
+Some BIOSes require the BPB (BIOS Parameter Block) to be defined.  
+The first 3 bytes of the BPB hold a short jump instruction followed by a NOP.
+This ensures that the processor won't attempt to execute data that is not code.  
+The remaining 33 bytes of the BPB can be safely set to zero.
+
+```asm
+jmp short <adr>  
+nop  
+; Set the rest of the BPB parameters to 0.  
+times 33 db 0
+```
+
 ## Disk Access
 
 The BIOS interrupt `int 0x13` provides an interface in real mode to read and write to an HDD (hard disk drive).  
