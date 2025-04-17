@@ -4,7 +4,7 @@ FunOS is a personal project that emerged from a desire to learn, experiment, and
 operating system developed for both fun and education.
 
 While the ultimate goal is to build a fully operational OS, FunOS is mainly designed as a learning and exploration tool.
-I’ve been developing it during my free time, and I hope this open-source project can inspire you to dive into kernel
+I develop it during my free time, and I hope this open-source project can inspire you to dive into kernel
 development, whether for learning or for fun.
 
 If you have any questions or would like to discuss anything about FunOS or kernel development, feel free to open a
