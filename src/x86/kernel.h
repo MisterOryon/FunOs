@@ -1,0 +1,13 @@
+//
+// Created by oryon on 4/22/25.
+//
+
+#ifndef KERNEL_H
+#define KERNEL_H
+
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
+
+void kernel_main();
+
+#endif //KERNEL_H

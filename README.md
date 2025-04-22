@@ -133,6 +133,7 @@ In FunOS, the following address is interesting:
 
 - **0x7c00**: This is the memory address where the bootloader is loaded.
 - **_start**: The entry point of `kernel.asm` (main function).
+- **kernel_main**: The entry point of `kernel.c` (main function).
 
 #### Debugging in GDB
 

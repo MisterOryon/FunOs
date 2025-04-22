@@ -1,4 +1,6 @@
-FILES = ./build/kernel.asm.o
+FILES = ./build/kernel.asm.o ./build/kernel.o
+INCLUDES = -I./src/x86
+FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 -Iinc
 
 all: ./bin/boot.bin ./bin/kernel.bin
 	rm -rf bin/os.bin
@@ -8,7 +10,7 @@ all: ./bin/boot.bin ./bin/kernel.bin
 
 ./bin/kernel.bin: $(FILES)
 	i686-elf-ld -g -relocatable $(FILES) -o ./build/kernelfull.o
-	i686-elf-gcc -T ./src/linker.ld -o ./bin/kernel.bin -ffreestanding -Oo -nostdlib ./build/kernelfull.o
+	i686-elf-gcc $(FLAGS) -T ./src/linker.ld -o ./bin/kernel.bin -ffreestanding -Oo -nostdlib ./build/kernelfull.o
 
 ./bin/boot.bin: ./src/x86/boot/boot_loader.asm
 	nasm -f bin ./src/x86/boot/boot_loader.asm -o ./bin/boot.bin
@@ -16,8 +18,12 @@ all: ./bin/boot.bin ./bin/kernel.bin
 ./build/kernel.asm.o: ./src/x86/kernel.asm
 	nasm -f elf -g ./src/x86/kernel.asm -o ./build/kernel.asm.o
 
+./build/kernel.o: ./src/x86/kernel.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/x86/kernel.c -o ./build/kernel.o
+
 clean:
 	rm -rf ./bin/boot.bin
 	rm -rf ./bin/kernel.bin
+	rm -rf ./bin/os.bin
 	rm -rf ${FILES}
 	rm -rf ./build/kernelfull.o

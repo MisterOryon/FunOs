@@ -1,5 +1,6 @@
 [BITS 32]
 global_start
+extern kernel_main
 
 CODE_SEG equ 0x08
 DATA_SEG equ 0x10
@@ -20,6 +21,8 @@ _start:
     mov ss, ax
     mov ebp, 0x00200000
     mov esp, ebp
+
+    call kernel_main
 
     jmp $
 
