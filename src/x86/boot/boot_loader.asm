@@ -32,6 +32,7 @@ init:
     mov sp, 0x7c00
     ; Enable interrupts.
     sti
+
 .load_protected:
     cli
     ; Load the GDT.
