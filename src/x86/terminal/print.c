@@ -10,11 +10,14 @@
 static uint16_t* g_video_mem = NULL;
 static unsigned g_cursor_row = 0;
 static unsigned g_cursor_column = 0;
-static const VgaColorAttributes DEFAULT_TEXT_COLORS = {COLOR_WHITE, COLOR_BLACK};
-static const VgaColorAttributes CLEAR_COLORS = {COLOR_BLACK, COLOR_BLACK};
+static const vga_color_attributes_t DEFAULT_TEXT_COLORS = {COLOR_WHITE, COLOR_BLACK};
+static const vga_color_attributes_t CLEAR_COLORS = {COLOR_BLACK, COLOR_BLACK};
 
 /**
- * Calculate string length
+ * Calculates the length of a null-terminated string.
+ *
+ * @param str A pointer to the null-terminated string whose length is to be calculated.
+ * @return The length of the string, excluding the null-terminator.
  */
 static size_t string_length(const char* str)
 {
@@ -24,16 +27,25 @@ static size_t string_length(const char* str)
 }
 
 /**
- * Create a VGA character with the specified color attributes
+ * Creates a VGA character with specified attributes and character value.
+ *
+ * @param c The character to be encoded.
+ * @param color A structure containing the foreground and background color attributes for the character.
+ * @return A 16-bit encoded VGA character combining the character value and color attributes.
  */
-static uint16_t vga_create_char(const char c, const VgaColorAttributes color)
+static uint16_t vga_create_char(const char c, const vga_color_attributes_t color)
 {
     const uint16_t attr = (color.background << VGA_BACKCOLOR_OFFSET) | (color.foreground & VGA_COLOR_MASK);
     return attr << VGA_COLOR_ATTRIBUTE_SHIFT | c;
 }
 
 /**
- * Put a character at the specified position
+ * Writes a character with associated attributes to a specific position
+ * in the VGA text buffer.
+ *
+ * @param x The horizontal coordinate of the character position. Must be within the valid range [0, VGA_WIDTH).
+ * @param y The vertical coordinate of the character position. Must be within the valid range [0, VGA_HEIGHT).
+ * @param c The character and its attributes (foreground and background color) packed into a 16-bit value.
  */
 static void vga_write_char_at(const unsigned x, const unsigned y, const uint16_t c)
 {
@@ -45,7 +57,11 @@ static void vga_write_char_at(const unsigned x, const unsigned y, const uint16_t
 }
 
 /**
- * Clear a specific line on the terminal
+ * Clears a single line on the display by writing blank characters with the
+ * default background and foreground colors.
+ *
+ * @param y The y-coordinate of the line to be cleared.
+ * The value must be within the vertical bounds of the display.
  */
 static void display_clear_line(const unsigned y)
 {
@@ -55,7 +71,12 @@ static void display_clear_line(const unsigned y)
 }
 
 /**
- * Scroll the terminal up by one line
+ * Scrolls the contents of the display up by one line.
+ *
+ * Copies all lines of the video memory buffer up one position and erases the
+ * bottom-most line by filling it with blank spaces.
+ * This effectively shifts all displayed content up one row, making space for
+ * new content at the bottom.
  */
 static void display_scroll_up(void)
 {
@@ -74,7 +95,12 @@ static void display_scroll_up(void)
 }
 
 /**
- * Handle terminal line overflow
+ * Handles line wrapping for the cursor in a VGA text mode display.
+ *
+ * Resets the cursor's column position to 0 when it reaches the end of a line.
+ * If the cursor's row position is at the last row of the screen, the display is scrolled up.
+ * Otherwise, the cursor moves to the next row.
+ * The new line where the cursor moves is cleared to prepare for further text.
  */
 static void cursor_handle_line_wrap(void)
 {
@@ -89,9 +115,13 @@ static void cursor_handle_line_wrap(void)
 }
 
 /**
- * Write a character to terminal with a specified color
+ * Writes a single character with specified color attributes to the display.
+ * Handles line wrapping and newline characters appropriately.
+ *
+ * @param c The character to be written to the display.
+ * @param color The VGA color attributes to apply to the character, including foreground and background colors.
  */
-static void display_put_char(const char c, const VgaColorAttributes color)
+static void display_put_char(const char c, const vga_color_attributes_t color)
 {
     const uint16_t char_code = vga_create_char(c, color);
     if (c == CHAR_NEWLINE)

@@ -37,14 +37,14 @@ typedef enum : unsigned char
     COLOR_LIGHT_MAGENTA = 13,
     COLOR_YELLOW = 14,
     COLOR_WHITE = 15
-} VgaColor;
+} vga_color_t;
 
 /* Color pair structure for foreground and background */
 typedef struct
 {
-    VgaColor foreground; // Represents the foreground color attribute for VGA text mode.
-    VgaColor background; // Represents the background color attribute for VGA text mode.
-} VgaColorAttributes;
+    vga_color_t foreground; // Represents the foreground color attribute for VGA text mode.
+    vga_color_t background; // Represents the background color attribute for VGA text mode.
+} vga_color_attributes_t;
 
 /**
  * @brief Clears the terminal screen

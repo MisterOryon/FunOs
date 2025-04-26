@@ -8,7 +8,7 @@
 
 void kernel_main()
 {
-    idt_init();
+    idt_initialize();
     display_initialize();
 
     char* hello = "Hello, world!\n";

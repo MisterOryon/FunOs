@@ -2,8 +2,8 @@ section .asm
 
 ; This function loads the address of an Interrupt Descriptor Table (IDT) into the CPU using the `lidt` instruction.
 ; The first argument to the function should be a pointer to the IDT structure.
-global idt_load
-idt_load:
+global idt_load_table
+idt_load_table:
     ; Save the current base pointer (EBP) to set up a stack frame for the function.
     push ebp
     mov ebp, esp

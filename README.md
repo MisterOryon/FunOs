@@ -88,7 +88,7 @@ Run the following command to install the required tools:
 
 ## Build
 
-Set up and build **FunOS** for x86, run::
+Set up and build **FunOS** for x86, run:
 
 ```bash
 mkdir cbuild

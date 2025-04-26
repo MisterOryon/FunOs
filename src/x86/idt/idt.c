@@ -8,20 +8,17 @@
 #include "memory/memory.h"
 #include <terminal/print.h>
 
-// Array to hold the descriptors for each interrupt.
-struct idt_desc idt_descriptors[FUNOS_TOTAL_INTERRUPTS];
-
-// IDTR descriptor that holds the base address and limit of the IDT.
-struct idtr_desc idtr_descriptor;
+static struct idt_entry g_idt_entries[FUNOS_TOTAL_INTERRUPTS];
+static struct idt_pointer g_idt_pointer;
 
 // Function to load the IDT into the CPU (implemented in assembly).
-extern void idt_load(struct idtr_desc* ptr);
+extern void idt_load_table(struct idt_pointer* ptr);
 
 /**
  * Divide by zero exception handlers.
  * This function is called when a divide-by-zero error occurs.
  */
-void idt_division_zero()
+static void idt_handle_division_zero(void)
 {
     console_write_string("Kernel interrupt: divide by zero interrupt occurs.\n");
     console_write_string("Kernel panic!\n");
@@ -33,7 +30,7 @@ void idt_division_zero()
  * This function is called when a debug interrupt occurs.
  * Kernel execution continues after this interrupt.
  */
-void idt_debug()
+static void idt_handle_debug(void)
 {
     console_write_string("Kernel interrupt: debug interrupt occurs.");
     console_write_string("Kernel skip idt");
@@ -44,7 +41,7 @@ void idt_debug()
  * This function is called when a non-maskable interrupt (NMI) occurs.
  * Kernel execution continues after this interrupt.
  */
-void idt_non_maskable_interrupt()
+static void idt_handle_non_maskable_interrupt(void)
 {
     console_write_string("Kernel interrupt: non-maskable interrupt occurs.");
     console_write_string("Kernel skip idt");
@@ -55,7 +52,7 @@ void idt_non_maskable_interrupt()
  * This function is called when a breakpoint instruction is executed.
  * Kernel execution continues after this interrupt.
  */
-void idt_breakpoint()
+static void idt_handle_breakpoint(void)
 {
     console_write_string("Kernel interrupt: breakpoint interrupt occurs.");
     console_write_string("Kernel skip idt");
@@ -66,7 +63,7 @@ void idt_breakpoint()
  * This function is called when an arithmetic overflow occurs.
  * Kernel execution continues after this interrupt.
  */
-void idt_overflow()
+static void idt_handle_overflow(void)
 {
     console_write_string("Kernel interrupt: overflow interrupt occurs.");
     console_write_string("Kernel skip idt");
@@ -78,7 +75,7 @@ void idt_overflow()
  * exceeds the specified boundaries.
  * Causes a system halt (kernel panic).
  */
-void idt_bound_range_exceeded()
+static void idt_handle_bound_range_exceeded(void)
 {
     console_write_string("Kernel interrupt: bound range interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -90,7 +87,7 @@ void idt_bound_range_exceeded()
  * This function is called when the processor attempts to execute an invalid instruction.
  * Causes a system halt (kernel panic).
  */
-void idt_invalid_opcode()
+static void idt_handle_invalid_opcode(void)
 {
     console_write_string("Kernel interrupt: invalid opcode interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -102,7 +99,7 @@ void idt_invalid_opcode()
  * This function is called when a coprocessor or extension is not available.
  * Causes a system halt (kernel panic).
  */
-void idt_device_not_available()
+static void idt_handle_device_not_available(void)
 {
     console_write_string("Kernel interrupt: device not available interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -115,7 +112,7 @@ void idt_device_not_available()
  * of a previous exception.
  * Causes a system halt (kernel panic).
  */
-void idt_double_fault()
+static void idt_handle_double_fault(void)
 {
     console_write_string("Kernel interrupt: double fault interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -127,7 +124,7 @@ void idt_double_fault()
  * This function is called when a coprocessor exceeds a segment boundary.
  * Causes a system halt (kernel panic).
  */
-void idt_coprocessor_segment_overrun()
+static void idt_handle_coprocessor_segment_overrun(void)
 {
     console_write_string("Kernel interrupt: coprocessor segment overrun interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -139,7 +136,7 @@ void idt_coprocessor_segment_overrun()
  * This function is called when there's an attempt to access an invalid TSS (Task State Segment).
  * Causes a system halt (kernel panic).
  */
-void idt_invalid_tss()
+static void idt_handle_invalid_tss(void)
 {
     console_write_string("Kernel interrupt: invalid tss interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -151,7 +148,7 @@ void idt_invalid_tss()
  * This function is called when there's an attempt to access a segment that is not present.
  * Causes a system halt (kernel panic).
  */
-void idt_segment_not_present()
+static void idt_handle_segment_not_present(void)
 {
     console_write_string("Kernel interrupt: segment not present interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -163,7 +160,7 @@ void idt_segment_not_present()
  * This function is called when an operation exceeds the stack segment limits.
  * Causes a system halt (kernel panic).
  */
-void idt_stack_segment_fault()
+static void idt_handle_stack_segment_fault(void)
 {
     console_write_string("Kernel interrupt: stack segment fault interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -176,7 +173,7 @@ void idt_stack_segment_fault()
  * covered by other exceptions.
  * Causes a system halt (kernel panic).
  */
-void idt_general_protection_fault()
+static void idt_handle_general_protection_fault(void)
 {
     console_write_string("Kernel interrupt: general protection fault interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -188,7 +185,7 @@ void idt_general_protection_fault()
  * This function is called when a memory access error occurs in paged memory.
  * Causes a system halt (kernel panic).
  */
-void idt_page_fault()
+static void idt_handle_page_fault(void)
 {
     console_write_string("Kernel interrupt: page fault interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -201,7 +198,7 @@ void idt_page_fault()
  * on the x87 coprocessor.
  * Causes a system halt (kernel panic).
  */
-void idt_x87_floating_point_exception()
+static void idt_handle_x87_floating_point_exception(void)
 {
     console_write_string("Kernel interrupt: x87 floating point exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -213,7 +210,7 @@ void idt_x87_floating_point_exception()
  * This function is called when a memory alignment error occurs.
  * Causes a system halt (kernel panic).
  */
-void idt_alignment_check()
+static void idt_handle_alignment_check(void)
 {
     console_write_string("Kernel interrupt: alignment check interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -225,7 +222,7 @@ void idt_alignment_check()
  * This function is called when a critical hardware error is detected by the processor.
  * Causes a system halt (kernel panic).
  */
-void idt_machine_check()
+static void idt_handle_machine_check(void)
 {
     console_write_string("Kernel interrupt: machine check interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -238,7 +235,7 @@ void idt_machine_check()
  * on the SIMD units (SSE, AVX, etc.).
  * Causes a system halt (kernel panic).
  */
-void idt_simd_floating_point_exception()
+static void idt_handle_simd_floating_point_exception(void)
 {
     console_write_string("Kernel interrupt: SIMD floating point exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -250,7 +247,7 @@ void idt_simd_floating_point_exception()
  * This function is called when an error related to virtualization operations occurs.
  * Causes a system halt (kernel panic).
  */
-void idt_virtualization_exception()
+static void idt_handle_virtualization_exception(void)
 {
     console_write_string("Kernel interrupt: virtualization exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -262,7 +259,7 @@ void idt_virtualization_exception()
  * This function is called when a violation of control protection mechanisms occurs.
  * Causes a system halt (kernel panic).
  */
-void idt_control_protection_exception()
+static void idt_handle_control_protection_exception(void)
 {
     console_write_string("Kernel interrupt: control protection exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -275,7 +272,7 @@ void idt_control_protection_exception()
  * by the hypervisor occurs.
  * Causes a system halt (kernel panic).
  */
-void idt_hypervisor_injection_exception()
+static void idt_handle_hypervisor_injection_exception(void)
 {
     console_write_string("Kernel interrupt: hypervisor injection exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -288,7 +285,7 @@ void idt_hypervisor_injection_exception()
  * virtual machine monitor occurs.
  * Causes a system halt (kernel panic).
  */
-void idt_vmm_communication_exception()
+static void idt_handle_vmm_communication_exception(void)
 {
     console_write_string("Kernel interrupt: vmm communication exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -300,7 +297,7 @@ void idt_vmm_communication_exception()
  * This function is called when a violation of processor security mechanisms occurs.
  * Causes a system halt (kernel panic).
  */
-void idt_security_exception()
+static void idt_handle_security_exception(void)
 {
     console_write_string("Kernel interrupt: security exception interrupt occurs.");
     console_write_string("Kernel panic!");
@@ -311,18 +308,18 @@ void idt_security_exception()
 /**
  * Maps an interrupt number to a handler function (address).
  *
- * @param interrupt_no The interrupt number to set.
+ * @param vector The interrupt number to set.
  * @param address The address of the handler function for the interrupt.
  */
-void idt_set(const int interrupt_no, void* address)
+static void idt_register_handler(const exception_vector_t vector, void* address)
 {
-    struct idt_desc* desc = &idt_descriptors[interrupt_no];
+    struct idt_entry* desc = &g_idt_entries[vector];
 
     // Set the lower 16 bits of the handler address.
-    desc->offset_low = (uint32_t)address & 0x0000FFFF;
+    desc->offset_low = (uint32_t)address & IDT_OFFSET_LOW_MASK;
 
     desc->selector = KERNEL_CODE_SELECTOR;
-    desc->zero = 0x00;
+    desc->reserved = 0x00;
 
     // Set the type and attributes for the descriptor:
     // - Present (P) bit: 1 (the handler is valid).
@@ -331,61 +328,55 @@ void idt_set(const int interrupt_no, void* address)
     desc->type_attr = 0xEE;
 
     // Set the higher 16 bits of the handler address.
-    desc->offset_high = (uint32_t)address >> 16;
+    desc->offset_high = (uint32_t)address >> IDT_OFFSET_HIGH_SHIFT;
 }
 
 /**
  * Initializes the Interrupt Descriptor Table (IDT).
- *
- * This function sets up the IDT by initializing its descriptors to zero,
- * adding custom interrupt handlers (e.g., divide by zero), and loading
- * the IDT into the CPU.
  */
-void idt_init()
+void idt_initialize(void)
 {
     // Clear all descriptors in the IDT to ensure it starts with a clean state.
-    memset(idt_descriptors, 0, sizeof(idt_descriptors));
+    memset(g_idt_entries, 0, sizeof(g_idt_entries));
 
     // Set the size of the IDT (limit) - 1 because the offset is zero-based.
-    idtr_descriptor.limit = sizeof(idt_descriptors) - 1;
+    g_idt_pointer.limit = sizeof(g_idt_entries) - 1;
 
     // Set the base address of the IDT table.
     // Cast the descriptor array pointer to uint32_t for proper storage.
-    idtr_descriptor.base = (uint32_t)idt_descriptors;
+    g_idt_pointer.base = (uint32_t)g_idt_entries;
 
     /**
-      * Maps standard CPU interrupts to their respective handlers.
-      * This sets up handlers for all standard x86 exceptions (interrupts 0-31),
-      * which include hardware exceptions, faults, and traps that can occur
-      * during normal system operation.
-      */
-    idt_set(0, idt_division_zero);
-    idt_set(1, idt_debug);
-    idt_set(2, idt_non_maskable_interrupt);
-    idt_set(3, idt_breakpoint);
-    idt_set(4, idt_overflow);
-    idt_set(5, idt_bound_range_exceeded);
-    idt_set(6, idt_invalid_opcode);
-    idt_set(7, idt_device_not_available);
-    idt_set(8, idt_double_fault);
-    idt_set(9, idt_coprocessor_segment_overrun);
-    idt_set(10, idt_invalid_tss);
-    idt_set(11, idt_segment_not_present);
-    idt_set(12, idt_stack_segment_fault);
-    idt_set(13, idt_general_protection_fault);
-    idt_set(14, idt_page_fault);
-    // 15 reserved.
-    idt_set(16, idt_x87_floating_point_exception);
-    idt_set(17, idt_alignment_check);
-    idt_set(18, idt_machine_check);
-    idt_set(19, idt_simd_floating_point_exception);
-    idt_set(20, idt_virtualization_exception);
-    idt_set(21, idt_control_protection_exception);
-    // 22-27 reserved.
-    idt_set(28, idt_hypervisor_injection_exception);
-    idt_set(29, idt_vmm_communication_exception);
-    idt_set(30, idt_security_exception);
+       * Maps standard CPU interrupts to their respective handlers.
+       * This sets up handlers for all standard x86 exceptions (interrupts 0-31),
+       * which include hardware exceptions, faults, and traps that can occur
+       * during normal system operation.
+       */
+    idt_register_handler(DIVISION_BY_ZERO, idt_handle_division_zero);
+    idt_register_handler(DEBUG, idt_handle_debug);
+    idt_register_handler(NON_MASKABLE_INTERRUPT, idt_handle_non_maskable_interrupt);
+    idt_register_handler(BREAKPOINT, idt_handle_breakpoint);
+    idt_register_handler(OVERFLOW, idt_handle_overflow);
+    idt_register_handler(BOUND_RANGE_EXCEEDED, idt_handle_bound_range_exceeded);
+    idt_register_handler(INVALID_OPCODE, idt_handle_invalid_opcode);
+    idt_register_handler(DEVICE_NOT_AVAILABLE, idt_handle_device_not_available);
+    idt_register_handler(DOUBLE_FAULT, idt_handle_double_fault);
+    idt_register_handler(COPROCESSOR_SEGMENT_OVERRUN, idt_handle_coprocessor_segment_overrun);
+    idt_register_handler(INVALID_TSS, idt_handle_invalid_tss);
+    idt_register_handler(SEGMENT_NOT_PRESENT, idt_handle_segment_not_present);
+    idt_register_handler(STACK_SEGMENT_FAULT, idt_handle_stack_segment_fault);
+    idt_register_handler(GENERAL_PROTECTION_FAULT, idt_handle_general_protection_fault);
+    idt_register_handler(PAGE_FAULT, idt_handle_page_fault);
+    idt_register_handler(X87_FLOATING_POINT_EXCEPTION, idt_handle_x87_floating_point_exception);
+    idt_register_handler(ALIGNMENT_CHECK, idt_handle_alignment_check);
+    idt_register_handler(MACHINE_CHECK, idt_handle_machine_check);
+    idt_register_handler(SIMD_FLOATING_POINT_EXCEPTION, idt_handle_simd_floating_point_exception);
+    idt_register_handler(VIRTUALIZATION_EXCEPTION, idt_handle_virtualization_exception);
+    idt_register_handler(CONTROL_PROTECTION_EXCEPTION, idt_handle_control_protection_exception);
+    idt_register_handler(HYPERVISOR_INJECTION_EXCEPTION, idt_handle_hypervisor_injection_exception);
+    idt_register_handler(VMM_COMMUNICATION_EXCEPTION, idt_handle_vmm_communication_exception);
+    idt_register_handler(SECURITY_EXCEPTION, idt_handle_security_exception);
 
     // Load the IDT into the processor using the assembly function.
-    idt_load(&idtr_descriptor);
+    idt_load_table(&g_idt_pointer);
 }
