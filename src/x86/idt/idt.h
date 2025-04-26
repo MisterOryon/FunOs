@@ -61,11 +61,7 @@ typedef enum : unsigned
 } exception_vector_t;
 
 /**
- * Initializes the Interrupt Descriptor Table (IDT).
- *
- * This function sets up the IDT by initializing its descriptors to zero,
- * adding custom interrupt handlers (e.g., divide by zero), and loading
- * the IDT into the CPU.
+ * @brief Initializes the Interrupt Descriptor Table (IDT).
  */
 void idt_initialize(void);
 

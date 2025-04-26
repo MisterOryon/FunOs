@@ -8,8 +8,9 @@
 #include <stddef.h>
 
 /**
- * Custom implementation of the `memset` function.
- * Sets the first `size` bytes of the block in memory, which is pointed to by `ptr`
+ * @brief Custom implementation of the `memset` function.
+ *
+ * This function sets the first `size` bytes of the block in memory, which is pointed to by `ptr`
  * to the specified value `c` (converted to an unsigned char).
  *
  * @param ptr  Pointer to the block of memory to fill.
