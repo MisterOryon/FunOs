@@ -47,8 +47,11 @@ that I need to keep in mind for reference.
 
 ### Interrupts
 
-- **[IVT](learning/x86/interrupts.md#ivt)**: The Interrupt Vector Table used for handling system interrupts.
-- **[Real Mode Exception Interrupts](learning/x86/real_mode.md)**: Exception handling in Real Mode.
+- **[IVT](learning/x86/interrupts.md#ivt)**: The Interrupt Vector Table used for handling system interrupts in real
+  mode.
+- **[IDT](learning/x86/interrupts.md#idt)**: The Interrupt Descriptor Table used for handling system interrupts in
+  protected mode.
+- **[Real Mode Exception Interrupts](learning/x86/real_mode.md)**: Exception handling in real mode.
 
 ### Protection Rings
 
@@ -58,3 +61,13 @@ that I need to keep in mind for reference.
 ### CPU Specification
 
 - **[Registers](learning/x86/registers.md)**: Details about CPU registers and their role in executing instructions.
+
+### Screen
+
+- **[Text Mode](learning/x86/text_mode.md)**: A mode where the screen is represented as a grid of characters,
+  each with customizable colors.
+
+### I/O Port
+
+- **[IN And OUT](learning/x86/io_port.md)** : I/O port used for communication between the processor and peripheral
+  devices.

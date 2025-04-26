@@ -88,18 +88,25 @@ Run the following command to install the required tools:
 
 ## Build
 
-To build FunOs for x86 run `./build.sh`.
+Set up and build **FunOS** for x86, run:
+
+```bash
+mkdir cbuild
+cd cbuild
+cmake ..
+make build_x86
+```
 
 ## Run
 
-To run FunOS, use the following command: `qemu-system-x86_64 -hda ./bin/os.bin`
+To run FunOS, use the following command: `qemu-system-i386 -hda ./cbuild/bin/os.bin`
 
 ## Run in Debugging Environment
 
 To run FunOS in a debugging environment, use the following command:
 
 ```bash
-qemu-system-x86_64 -s -S -hda ./bin/os.bin
+qemu-system-i386 -s -S -hda ./cbuild/bin/os.bin
 ```
 
 - **`-s`**: Shorthand for `-gdb tcp::1234`, which starts a GDB server listening on TCP port 1234.
@@ -112,7 +119,7 @@ This allows you to connect a debugger like GDB to debug FunOS step-by-step.
 To load debug information, use the following command in GDB:
 
 ```bash
-add-symbol-file build/kernelfull.o 0x100000
+add-symbol-file ./cbuild/build/kernelfull.o 0x100000
 ```
 
 To connect to QEMU with GDB, issue the following command inside GDB:
@@ -132,7 +139,8 @@ break *<addr>
 In FunOS, the following address is interesting:
 
 - **0x7c00**: This is the memory address where the bootloader is loaded.
-- **_start**: The entry point of `kernel.asm` (main function).
+- **_start**: The entry point of `kernel.asm` (the main function).
+- **kernel_main**: The entry point of `kernel.c` (the main function).
 
 #### Debugging in GDB
 
