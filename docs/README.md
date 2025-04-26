@@ -66,3 +66,8 @@ that I need to keep in mind for reference.
 
 - **[Text Mode](learning/x86/text_mode.md)**: A mode where the screen is represented as a grid of characters,
   each with customizable colors.
+
+### I/O Port
+
+- **[IN And OUT](learning/x86/io_port.md)** : I/O port used for communication between the processor and peripheral
+  devices.
