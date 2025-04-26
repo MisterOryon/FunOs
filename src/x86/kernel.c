@@ -3,6 +3,7 @@
 //
 #include "kernel.h"
 
+#include <io.h>
 #include <idt/idt.h>
 #include <terminal/print.h>
 
@@ -10,6 +11,9 @@ void kernel_main()
 {
     idt_initialize();
     display_initialize();
+
+    // Send a power-on reset sequence to the keyboard controller to ensure that the keyboard is in a known state.
+    io_outb(0x60, 0xff);
 
     char* hello = "Hello, world!\n";
 

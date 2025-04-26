@@ -4,6 +4,7 @@
 
 #include "print.h"
 
+#include <io.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -11,7 +12,6 @@ static uint16_t* g_video_mem = NULL;
 static unsigned g_cursor_row = 0;
 static unsigned g_cursor_column = 0;
 static const vga_color_attributes_t DEFAULT_TEXT_COLORS = {COLOR_WHITE, COLOR_BLACK};
-static const vga_color_attributes_t CLEAR_COLORS = {COLOR_BLACK, COLOR_BLACK};
 
 /**
  * Calculates the length of a null-terminated string.
@@ -57,6 +57,21 @@ static void vga_write_char_at(const unsigned x, const unsigned y, const uint16_t
 }
 
 /**
+ * Enables the hardware text-mode cursor by setting its starting and ending scanline positions.
+ *
+ * @param cursor_start The starting scanline of the cursor.
+ * @param cursor_end The ending scanline of the cursor.
+ */
+static void vga_enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
+{
+    io_outb(0x3D4, 0x0A);
+    io_outb(0x3D5, (io_inb(0x3D5) & 0xC0) | cursor_start);
+
+    io_outb(0x3D4, 0x0B);
+    io_outb(0x3D5, (io_inb(0x3D5) & 0xE0) | cursor_end);
+}
+
+/**
  * Clears a single line on the display by writing blank characters with the
  * default background and foreground colors.
  *
@@ -65,7 +80,7 @@ static void vga_write_char_at(const unsigned x, const unsigned y, const uint16_t
  */
 static void display_clear_line(const unsigned y)
 {
-    const uint16_t black = vga_create_char(' ', CLEAR_COLORS);
+    const uint16_t black = vga_create_char(0x0, DEFAULT_TEXT_COLORS);
     for (int x = 0; x < VGA_WIDTH; x++)
         vga_write_char_at(x, y, black);
 }
@@ -145,6 +160,22 @@ void display_clear(void)
 }
 
 /**
+ * Updates the position of the hardware text mode cursor.
+ *
+ * @param x The column position of the cursor.
+ * @param y The row position of the cursor.
+ */
+void display_set_cursor_position(const unsigned x, const unsigned y)
+{
+    const uint16_t pos = y * VGA_WIDTH + x;
+
+    io_outb(0x3D4, 0x0F);
+    io_outb(0x3D5, (uint8_t)(pos & 0xFF));
+    io_outb(0x3D4, 0x0E);
+    io_outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+}
+
+/**
  * Initialize the terminal
  */
 void display_initialize(void)
@@ -153,6 +184,8 @@ void display_initialize(void)
     g_cursor_row = 0;
     g_cursor_column = 0;
     display_clear();
+    vga_enable_cursor(14, 15);
+    display_set_cursor_position(0, 0);
 }
 
 /**
@@ -163,6 +196,7 @@ void console_write_string(const char* str)
     const size_t len = string_length(str);
     for (size_t i = 0; i < len; i++)
         display_put_char(str[i], DEFAULT_TEXT_COLORS);
+    display_set_cursor_position(g_cursor_column, g_cursor_row);
 }
 
 /**
@@ -177,6 +211,7 @@ void console_write_uint(const unsigned value)
     if (value == 0)
     {
         display_put_char('0', DEFAULT_TEXT_COLORS);
+        display_set_cursor_position(g_cursor_column, g_cursor_row);
         return;
     }
 
@@ -190,5 +225,7 @@ void console_write_uint(const unsigned value)
     // Display the numbers in the correct order
     while (pos > 0)
         display_put_char(buffer[--pos], DEFAULT_TEXT_COLORS);
+
+    display_set_cursor_position(g_cursor_column, g_cursor_row);
 }
 

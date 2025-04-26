@@ -48,6 +48,7 @@ set(BOOTLOADER_SRC ${CMAKE_SOURCE_DIR}/src/x86/boot/boot_loader.asm)
 set(KERNEL_ASM_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/kernel.asm
         ${CMAKE_SOURCE_DIR}/src/x86/idt/idt.asm
+        ${CMAKE_SOURCE_DIR}/src/x86/io/io.asm
         # Add additional assembly files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.asm
 )
@@ -57,6 +58,7 @@ set(KERNEL_INCLUDE_DIRS
         ${CMAKE_SOURCE_DIR}/src/x86/memory
         ${CMAKE_SOURCE_DIR}/src/x86/idt
         ${CMAKE_SOURCE_DIR}/src/x86/terminal/
+        ${CMAKE_SOURCE_DIR}/src/x86/io/
         # Add additional include directories here
 )
 # Define kernel C source files as a list
@@ -66,6 +68,7 @@ set(KERNEL_C_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/memory/memory.c
         ${CMAKE_SOURCE_DIR}/src/x86/idt/idt.c
         ${CMAKE_SOURCE_DIR}/src/x86/terminal/print.c
+        ${CMAKE_SOURCE_DIR}/src/x86/io/io.c
         # Add additional C files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.c
 )
