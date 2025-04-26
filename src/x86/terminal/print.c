@@ -170,9 +170,9 @@ void display_set_cursor_position(const unsigned x, const unsigned y)
     const uint16_t pos = y * VGA_WIDTH + x;
 
     io_outb(0x3D4, 0x0F);
-    io_outb(0x3D5, (uint8_t)(pos & 0xFF));
+    io_outb(0x3D5, pos & 0xFF);
     io_outb(0x3D4, 0x0E);
-    io_outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+    io_outb(0x3D5, (pos >> 8) & 0xFF);
 }
 
 /**
