@@ -16,6 +16,7 @@
 
 #define CHAR_NEWLINE '\n'
 
+#define INT_SIGN_BIT_MASK 0x80000000
 
 /* VGA Color Definitions */
 typedef enum : unsigned char
@@ -75,5 +76,11 @@ void console_write_string(const char* str);
  * @param value The value to print
  */
 void console_write_uint(unsigned value);
+
+/**
+ * @brief Writes an integer to the console.
+ * @param value The integer to be written to the console.
+ */
+void console_write_int(const int value);
 
 #endif //PRINT_H

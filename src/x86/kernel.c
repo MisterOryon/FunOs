@@ -15,12 +15,19 @@ void kernel_main()
     // Send a power-on reset sequence to the keyboard controller to ensure that the keyboard is in a known state.
     io_outb(0x60, 0xff);
 
-    char* hello = "Hello, world!\n";
+    const char* hello = "Hello, world! ";
 
-    for (unsigned i = 595; i < 600; i++)
+    for (unsigned i = 0; i < 5; i++)
     {
         console_write_string(hello);
         console_write_uint(i);
+        console_write_string("\n");
+    }
+
+    for (int i = -5; i < 10; i++)
+    {
+        console_write_string(hello);
+        console_write_int(i);
         console_write_string("\n");
     }
 

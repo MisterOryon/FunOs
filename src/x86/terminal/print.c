@@ -225,7 +225,20 @@ void console_write_uint(const unsigned value)
     // Display the numbers in the correct order
     while (pos > 0)
         display_put_char(buffer[--pos], DEFAULT_TEXT_COLORS);
-
     display_set_cursor_position(g_cursor_column, g_cursor_row);
 }
 
+/**
+ * Writes a signed integer to the console.
+ */
+void console_write_int(const int value)
+{
+    if (value & INT_SIGN_BIT_MASK)
+    {
+        display_put_char('-', DEFAULT_TEXT_COLORS);
+        console_write_uint((~(unsigned)value) + 1);
+        return;
+    }
+
+    console_write_uint(value);
+}
