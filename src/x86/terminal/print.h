@@ -53,12 +53,13 @@ typedef struct
 void display_clear(void);
 
 /**
- * @brief Updates the cursor position on the screen.
+ * @brief Sets the cursor position on the display.
  *
- * @param x The horizontal position of the cursor in character cells.
- * @param y The vertical position of the cursor in character cells.
+ * @param x The horizontal position of the cursor (0-based index).
+ * @param y The vertical position of the cursor (0-based index).
+ * @return 0 if the cursor position is successfully set, or -1 if the position is out of bounds.
  */
-void display_set_cursor_position(const unsigned x, const unsigned y);
+int display_set_cursor_position(const unsigned x, const unsigned y);
 
 /**
  * @brief Initializes the terminal for printing

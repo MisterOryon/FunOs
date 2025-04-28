@@ -72,6 +72,22 @@ static void vga_enable_cursor(const uint8_t cursor_start, const uint8_t cursor_e
 }
 
 /**
+ * Updates the cursor position on the VGA text-mode display.
+ */
+static void vga_update_cursor_position(void)
+{
+    const uint16_t pos = (g_cursor_row * VGA_WIDTH) + g_cursor_column;
+
+    if (pos >= VGA_WIDTH * VGA_HEIGHT)
+        return;
+
+    io_outb(0x3D4, 0x0F);
+    io_outb(0x3D5, pos & 0xFF);
+    io_outb(0x3D4, 0x0E);
+    io_outb(0x3D5, (pos >> 8) & 0xFF);
+}
+
+/**
  * Clears a single line on the display by writing blank characters with the
  * default background and foreground colors.
  *
@@ -160,19 +176,17 @@ void display_clear(void)
 }
 
 /**
- * Updates the position of the hardware text mode cursor.
- *
- * @param x The column position of the cursor.
- * @param y The row position of the cursor.
+ * Sets the cursor position on the display.
  */
-void display_set_cursor_position(const unsigned x, const unsigned y)
+int display_set_cursor_position(const unsigned x, const unsigned y)
 {
-    const uint16_t pos = y * VGA_WIDTH + x;
+    if (x >= VGA_WIDTH || y >= VGA_HEIGHT)
+        return -1;
 
-    io_outb(0x3D4, 0x0F);
-    io_outb(0x3D5, pos & 0xFF);
-    io_outb(0x3D4, 0x0E);
-    io_outb(0x3D5, (pos >> 8) & 0xFF);
+    g_cursor_column = x;
+    g_cursor_row = y;
+    vga_update_cursor_position();
+    return 0;
 }
 
 /**
@@ -185,7 +199,7 @@ void display_initialize(void)
     g_cursor_column = 0;
     display_clear();
     vga_enable_cursor(14, 15);
-    display_set_cursor_position(0, 0);
+    vga_update_cursor_position();
 }
 
 /**
@@ -196,7 +210,7 @@ void console_write_string(const char* str)
     const size_t len = string_length(str);
     for (size_t i = 0; i < len; i++)
         display_put_char(str[i], DEFAULT_TEXT_COLORS);
-    display_set_cursor_position(g_cursor_column, g_cursor_row);
+    vga_update_cursor_position();
 }
 
 /**
@@ -211,7 +225,7 @@ void console_write_uint(const unsigned value)
     if (value == 0)
     {
         display_put_char('0', DEFAULT_TEXT_COLORS);
-        display_set_cursor_position(g_cursor_column, g_cursor_row);
+        vga_update_cursor_position();
         return;
     }
 
@@ -225,7 +239,7 @@ void console_write_uint(const unsigned value)
     // Display the numbers in the correct order
     while (pos > 0)
         display_put_char(buffer[--pos], DEFAULT_TEXT_COLORS);
-    display_set_cursor_position(g_cursor_column, g_cursor_row);
+    vga_update_cursor_position();
 }
 
 /**
