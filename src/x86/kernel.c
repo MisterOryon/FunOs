@@ -31,5 +31,6 @@ void kernel_main()
         console_write_string("\n");
     }
 
-    console_write_string("bye\n");
+    display_set_cursor_position(0, VGA_HEIGHT - 1);
+    console_write_string("bye");
 }
