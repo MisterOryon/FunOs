@@ -12,6 +12,14 @@ The `x86` folder provides detailed information specific to the x86 architecture.
 Detailed information about how FunOS boots on x86 architecture can be found in
 the [boot sequence documentation](x86/boot.md).
 
+### Kernel Startup
+
+The requirements and setup done by FunOS during startup can be found in the [kernel_startup](x86/kernel_startup.md) doc.
+
+### Display
+
+For details about how to print messages on the screen, see the [display](x86/display.md) doc.
+
 # Learning docs
 
 The **learning folder** contains a compilation of information that I use to build **FunOS**.
