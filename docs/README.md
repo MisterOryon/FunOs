@@ -82,5 +82,5 @@ that I need to keep in mind for reference.
 
 ### PIC (Programmable Interrupt Controller)
 
-- **[PIC](learning/pic.md)**: Hardware component in computer systems that manages hardware interrupt requests (IRQs) and
-  prioritizes them before sending to the CPU.
+- **[PIC](learning/x86/pic.md)**: Hardware component in computer systems that manages hardware interrupt requests (IRQs)
+  and prioritizes them before sending to the CPU.
