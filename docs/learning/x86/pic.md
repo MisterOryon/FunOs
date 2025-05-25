@@ -75,3 +75,28 @@ Basic commands for PIC setup include:
 
 7) When the key is released, a similar sequence occurs, allowing the system to recognize that the key is no longer being
    pressed.
+
+## Why Remap the PIC?
+
+The PIC (Programmable Interrupt Controller), by default, maps its interrupts starting at 0, which overlaps with the CPU
+exception handlers set in the IDT (Interrupt Descriptor Table) for the first 32 interrupts (0 to 31).
+To avoid this conflict, we need to remap the PIC so that its interrupts start from 32 (0x20).
+This ensures that there is no confusion between CPU exceptions and device interrupts.
+
+The remapping is done by sending ICW (Initialization Control Word) commands to the PIC:
+
+1) **Start Initialization**: Send ICW1 to the command port of both PICs.
+
+2) **Define the Vector Offset**: Send ICW2 to the data port of both PICs.
+   This specifies the starting interrupt number that the PIC should use for its interrupts.
+   Typically, the master PIC is set with 32 (0x20) and the slave PIC is set with 40 (0x28).
+
+3) **Define the Cascade**: Send ICW3 to the data port of both PICs.
+   This informs the master PIC about the presence of the slave PIC and tells the identity of the slave PIC.
+
+4) **Environment Information**: Send ICW4 to the data port of both PICs.
+   This provides additional information to the PICs about the environment in which they are operating.
+
+5) **End Initialization**: After the ICWs have been set, the PICs are ready to handle interrupts.
+
+After remapping the PIC, all Interrupt Service Routines (ISRs) will add the new offset to their interrupt number.
