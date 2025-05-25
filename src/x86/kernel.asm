@@ -28,7 +28,21 @@ _start:
     mov ebp, 0x00200000
     mov esp, ebp
 
-    call kernel_main
+    ; Remap the master PIC
+    ; ICW1
+    mov al, 00010001b
+    out 0x20, al;
+    ; ICW2 set the PIC offet to 0x20.
+    mov al, 0x20
+    out 0x21, al
+    ; ICW4
+    mov al, 00000001b
+    out 0x21, al;
+
+    ; Enable interrupts
+    sti
+
+    call CODE_SEG:kernel_main
 
     ; Do nothing more, enter an infinite loop.
     cli

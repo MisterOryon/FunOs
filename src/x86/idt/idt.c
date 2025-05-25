@@ -7,12 +7,18 @@
 #include "config.h"
 #include "memory/memory.h"
 #include <terminal/print.h>
+#include <io/io.h>
 
 static struct idt_entry g_idt_entries[FUNOS_TOTAL_INTERRUPTS];
 static struct idt_pointer g_idt_pointer;
 
 // Function to load the IDT into the CPU (implemented in assembly).
 extern void idt_load_table(struct idt_pointer* ptr);
+
+// Assembly interrupt handler for keyboard events.
+extern void idt_handle_keyboard_interrupt(void);
+// Default assembly interrupt handler for unhandled interrupts.
+extern void idt_no_interrupt(void);
 
 /**
  * Divide by zero exception handlers.
@@ -304,6 +310,31 @@ static void idt_handle_security_exception(void)
     while (1);
 }
 
+/**
+ * Keyboard interrupt handler.
+ * This function processes keyboard input by outputs the scancode to the console.
+ */
+void handle_keyboard_interrupt(void)
+{
+    // Get keycode from keyboard controller.
+    const uint8_t keycode = io_inb(0x60);
+
+    console_write_uint(keycode);
+    console_write_string("\n");
+
+    // Tell the PIC that we have handled the interrupt.
+    io_outb(PIC1_COMMAND, PIC_EOI);
+}
+
+/**
+ * Handles spurious or unused interrupts.
+ * This function acts as a default handler for interrupts that don't require specific processing.
+ */
+void handler_no_interrupt(void)
+{
+    // Tell the PIC that we have handled the interrupt.
+    io_outb(PIC1_COMMAND, PIC_EOI);
+}
 
 /**
  * Maps an interrupt number to a handler function (address).
@@ -346,6 +377,10 @@ void idt_initialize(void)
     // Cast the descriptor array pointer to uint32_t for proper storage.
     g_idt_pointer.base = (uint32_t)g_idt_entries;
 
+    // Set default interrupt handler.
+    for (int i = 0; i < FUNOS_TOTAL_INTERRUPTS; i++)
+        idt_register_handler(i, idt_no_interrupt);
+
     /**
        * Maps standard CPU interrupts to their respective handlers.
        * This sets up handlers for all standard x86 exceptions (interrupts 0-31),
@@ -376,6 +411,11 @@ void idt_initialize(void)
     idt_register_handler(HYPERVISOR_INJECTION_EXCEPTION, idt_handle_hypervisor_injection_exception);
     idt_register_handler(VMM_COMMUNICATION_EXCEPTION, idt_handle_vmm_communication_exception);
     idt_register_handler(SECURITY_EXCEPTION, idt_handle_security_exception);
+
+    /*
+     * Maps standard PIC interrupts to their respective handlers.
+     */
+    idt_register_handler(KEYBOARD_INTERRUPT, idt_handle_keyboard_interrupt);
 
     // Load the IDT into the processor using the assembly function.
     idt_load_table(&g_idt_pointer);

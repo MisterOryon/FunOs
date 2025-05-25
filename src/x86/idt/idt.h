@@ -6,6 +6,13 @@
 #define IDT_H
 #include <stdint.h>
 
+// IO base address for master PIC.
+#define PIC1		0x20
+#define PIC1_COMMAND PIC1
+#define PIC1_DATA	(PIC1+1)
+
+// End-of-interrupt command code
+#define PIC_EOI		0x20
 
 #define IDT_OFFSET_LOW_MASK 0x0000FFFF
 #define IDT_OFFSET_HIGH_SHIFT 16
@@ -58,6 +65,8 @@ typedef enum : unsigned
     VMM_COMMUNICATION_EXCEPTION = 29,
     SECURITY_EXCEPTION = 30,
     // 31 est reserved
+    TIMER_INTERRUPT = 32,
+    KEYBOARD_INTERRUPT = 33,
 } exception_vector_t;
 
 /**
