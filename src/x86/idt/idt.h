@@ -38,36 +38,69 @@ struct idt_pointer
 
 typedef enum : unsigned
 {
+    // CPU exception: Occurs when dividing by zero or when the result cannot be represented.
     DIVISION_BY_ZERO = 0,
+    // CPU exception: Raised when debugging conditions occur (e.g., hardware breakpoints).
     DEBUG = 1,
+    // Hardware interrupt: Cannot be disabled, typically signals critical hardware failures.
     NON_MASKABLE_INTERRUPT = 2,
+    // CPU exception: Triggered by INT3 instruction, used for software debugging.
     BREAKPOINT = 3,
+    // CPU exception: Result of an arithmetic operation is too large (INTO instruction).
     OVERFLOW = 4,
+    // CPU exception: BOUND instruction detects an index outside array boundaries.
     BOUND_RANGE_EXCEEDED = 5,
+    // CPU exception: Processor encounters an undefined opcode.
     INVALID_OPCODE = 6,
+    // CPU exception: Attempt to use FPU/MMX/SSE when not available.
     DEVICE_NOT_AVAILABLE = 7,
+    // CPU exception: Error occurs while handling another exception (serious system error).
     DOUBLE_FAULT = 8,
+    // CPU exception: Floating-point instruction exceeds segment limit (legacy 387 error).
     COPROCESSOR_SEGMENT_OVERRUN = 9,
+    // CPU exception: Invalid Task State Segment during task switch.
     INVALID_TSS = 10,
+    // CPU exception: Attempt to access segment marked as not present.
     SEGMENT_NOT_PRESENT = 11,
+    // CPU exception: Stack operation exceeds stack segment limit or segment not present.
     STACK_SEGMENT_FAULT = 12,
+    // CPU exception: General memory protection violation not covered by other exceptions.
     GENERAL_PROTECTION_FAULT = 13,
+    // CPU exception: Memory access violation in paged memory (absent/protection/rights).
     PAGE_FAULT = 14,
-    // 15 reserved.
+
+    // 15 reserved by Intel
+
+    // CPU exception: Floating-point error from x87 FPU (e.g., invalid operation).
     X87_FLOATING_POINT_EXCEPTION = 16,
+    // CPU exception: Unaligned memory access when alignment checking enabled.
     ALIGNMENT_CHECK = 17,
+    // CPU exception: CPU detected internal hardware error (may be non-recoverable).
     MACHINE_CHECK = 18,
+    // CPU exception: Error in SIMD floating-point operations (SSE/AVX).
     SIMD_FLOATING_POINT_EXCEPTION = 19,
+    // CPU exception: Error related to virtualization features (EPT violations).
     VIRTUALIZATION_EXCEPTION = 20,
+    // CPU exception: Control-flow enforcement technology (CET) violation.
     CONTROL_PROTECTION_EXCEPTION = 21,
-    // 22-27 reserved.
+
+    // 22-27 reserved by Intel.
+
+    // CPU exception: Hypervisor-injected exception in virtualized environment.
     HYPERVISOR_INJECTION_EXCEPTION = 28,
+    // CPU exception: Error in VM and VMM communication.
     VMM_COMMUNICATION_EXCEPTION = 29,
+    // CPU exception: Security-sensitive event in secure mode operation.
     SECURITY_EXCEPTION = 30,
-    // 31 est reserved
+
+    // 31 reserved by Intel.
+
+    // IRQ 0: Programmable Interval Timer (PIT) interrupt.
     TIMER_INTERRUPT = 32,
+    // IRQ 1: Keyboard controller interrupt.
     KEYBOARD_INTERRUPT = 33,
 } exception_vector_t;
+
 
 /**
  * @brief Initializes the Interrupt Descriptor Table (IDT).
