@@ -2,6 +2,7 @@
 
 The first function that the bootloader must call is `_start` in `kernel.asm`.
 This function ensures that A20 and segment registers are set up correctly.
+After that, it sets up the master PIC with interrupt offset 0x20 to enable it to handle interrupts.
 
 Note that FunOs assumes that:
 
@@ -14,8 +15,9 @@ The `kernel_main` calls `idt_initialize` and `display_initialize` to complete th
 ## IDT
 
 The `idt_initialize` function sets up basic handlers for x86 interruption numbers 0 to 30.
-When an interruption is triggered, the handler prints a message corresponding to the interruption in the screen.
-If it is an exception interruption, the handler prints a kernel panic message and stops the kernel execution.
+It also sets up handlers for PIC IRQ 1: Keyboard controller interrupt.
+
+Note that if it is an exception interruption, the handler prints a kernel panic message and stops the kernel execution.
 
 ## Display
 

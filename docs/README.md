@@ -79,3 +79,8 @@ that I need to keep in mind for reference.
 
 - **[IN And OUT](learning/x86/io_port.md)** : I/O port used for communication between the processor and peripheral
   devices.
+
+### PIC (Programmable Interrupt Controller)
+
+- **[PIC](learning/x86/pic.md)**: Hardware component in computer systems that manages hardware interrupt requests (IRQs)
+  and prioritizes them before sending to the CPU.
