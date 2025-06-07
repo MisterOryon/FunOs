@@ -20,6 +20,10 @@ The requirements and setup done by FunOS during startup can be found in the [ker
 
 For details about how to print messages on the screen, see the [display](x86/display.md) doc.
 
+### Memory
+
+For details about how FunOS memory is managed, see the [memory](x86/memory.md) doc.
+
 # Learning docs
 
 The **learning folder** contains a compilation of information that I use to build **FunOS**.

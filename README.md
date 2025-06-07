@@ -119,6 +119,12 @@ This allows you to connect a debugger like GDB to debug FunOS step-by-step.
 To load debug information, use the following command in GDB:
 
 ```bash
+add-symbol-file ./cmake-build-debug/bin/kernel-debug.elf
+```
+
+If you encounter issues with the ELF debug files, you can alternatively use:
+
+```bash
 add-symbol-file ./cbuild/build/kernelfull.o 0x100000
 ```
 
