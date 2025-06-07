@@ -56,6 +56,10 @@ that I need to keep in mind for reference.
 
 - **[Segment](learning/x86/real_mode.md#memory)**: Memory segmentation in Real Mode.
 - **[GDT](learning/x86/protected_mode.md#memory)**: Global Descriptor Table used in Protected Mode.
+- **[Stack](learning/x86/memory.md#stack)**: Fast, LIFO (Last-In-First-Out) memory structure used for function calls,
+  local variables, and program flow control.
+- **[Heap](learning/x86/memory.md#heap)** : Dynamically allocated memory region used for data structures of variable
+  size and lifetime.
 
 ### Interrupts
 
