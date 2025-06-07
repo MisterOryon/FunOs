@@ -72,6 +72,7 @@ static size_t heap_align_value_to_upper(size_t value)
  */
 static int heap_get_start_block(size_t* start_block, const struct heap* heap, const size_t total_blocks)
 {
+    int res = FUNOS_ALL_OK;
     const struct heap_table* table = heap->table;
     bool foundFreeBlock = false;
     size_t bc = 0;
@@ -96,9 +97,13 @@ static int heap_get_start_block(size_t* start_block, const struct heap* heap, co
     }
 
     if (!foundFreeBlock || bc != total_blocks)
-        return -ENOMEN;
+    {
+        res = -ENOMEN;
+        goto out;
+    }
 
-    return 0;
+out:
+    return res;
 }
 
 /**
@@ -127,7 +132,7 @@ static void* heap_block_to_address(const struct heap* heap, const size_t block)
 static void heap_mark_blocks_taken(const struct heap* heap, const size_t start_block, const size_t total_blocks)
 {
     const size_t end_block = (start_block + total_blocks) - 1;
-    heap_block_table_entry_t entry = 0x0;
+    heap_block_table_entry_t entry = 0x00;
 
     entry = HEAP_BLOCK_TABLE_ENTRY_FLAG_TAKEN | HEAP_BLOCK_TABLE_ENTRY_FLAG_IS_FIRST;
     if (total_blocks > 1)
@@ -136,7 +141,7 @@ static void heap_mark_blocks_taken(const struct heap* heap, const size_t start_b
     for (size_t i = start_block; i <= end_block; i++)
     {
         heap->table->entries[i] = entry;
-        entry = 0x0 | HEAP_BLOCK_TABLE_ENTRY_FLAG_TAKEN;
+        entry = 0x00 | HEAP_BLOCK_TABLE_ENTRY_FLAG_TAKEN;
         if (i + 1 < end_block)
             entry |= HEAP_BLOCK_TABLE_ENTRY_FLAG_HAS_NEXT;
     }
@@ -188,7 +193,7 @@ static int heap_mark_block_free(const struct heap* heap, const size_t start_bloc
         heap_block_table_entry_t* entry = &table->entries[i];
         const bool hasNext = *entry & HEAP_BLOCK_TABLE_ENTRY_FLAG_HAS_NEXT;
 
-        *entry = 0x0;
+        *entry = 0x00;
         if (!hasNext)
             break;
     }
