@@ -59,6 +59,7 @@ set(KERNEL_INCLUDE_DIRS
         ${CMAKE_SOURCE_DIR}/src/x86/idt
         ${CMAKE_SOURCE_DIR}/src/x86/terminal/
         ${CMAKE_SOURCE_DIR}/src/x86/io/
+        ${CMAKE_SOURCE_DIR}/src/x86/heap/
         # Add additional include directories here
 )
 # Define kernel C source files as a list
@@ -69,10 +70,13 @@ set(KERNEL_C_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/idt/idt.c
         ${CMAKE_SOURCE_DIR}/src/x86/terminal/print.c
         ${CMAKE_SOURCE_DIR}/src/x86/io/io.c
+        ${CMAKE_SOURCE_DIR}/src/x86/heap/heap.c
+        ${CMAKE_SOURCE_DIR}/src/x86/heap/kheap.c
         # Add additional C files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.c
 )
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/src/linker.ld)
+set(LINKER_SCRIPT_DEBUG ${CMAKE_SOURCE_DIR}/src/linker-debug.ld)
 
 # Target for bootloader (keep custom command as it requires -f bin format)
 add_custom_command(
@@ -124,6 +128,14 @@ add_custom_command(
         COMMENT "Linking kernel objects"
 )
 
+# Create GDB debug kernel binary
+add_custom_command(
+        OUTPUT ${BIN_DIR}/kernel-debug.elf
+        COMMAND ${CMAKE_C_COMPILER} ${KERNEL_C_FLAGS} -T ${LINKER_SCRIPT_DEBUG} -o ${BIN_DIR}/kernel-debug.elf ${BUILD_DIR}/kernelfull.o
+        DEPENDS ${BUILD_DIR}/kernelfull.o ${LINKER_SCRIPT_DEBUG}
+        COMMENT "Building debug ELF kernel"
+)
+
 # Create final kernel binary
 add_custom_command(
         OUTPUT ${BIN_DIR}/kernel.bin
@@ -145,7 +157,7 @@ add_custom_command(
 
 # Main target
 add_custom_target(build_x86
-        DEPENDS ${BIN_DIR}/os.bin
+        DEPENDS ${BIN_DIR}/os.bin ${BIN_DIR}/kernel-debug.elf
 )
 
 # Clean target

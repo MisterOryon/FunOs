@@ -10,7 +10,7 @@ Note that FunOs assumes that:
 - The processor is already in protected mode.
 
 After `_start` has setup the environment, it calls `kernel_main` in `kernel.c`.
-The `kernel_main` calls `idt_initialize` and `display_initialize` to complete the setup of FunOs.
+The `kernel_main` calls `idt_initialize`, `display_initialize` and `kernel_heap_init` to complete the setup of FunOs.
 
 ## IDT
 
@@ -23,3 +23,9 @@ Note that if it is an exception interruption, the handler prints a kernel panic 
 
 The `display_initialize` function sets up the VGA text mode and clears all content shown on screen.
 After that kernel developers can use `console_write` functions to print messages in the screen.
+
+## Heap
+
+The `kernel_heap_init` function sets up a kernel heap of 104,857,600 bytes (100MB) between memory
+addresses 0x01000000 and 0x08594000.
+After that, kernel developers can use `kernel_malloc` and `kernel_free` functions for dynamic memory allocation.

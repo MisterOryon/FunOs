@@ -31,12 +31,13 @@ Together, we can make FunOS an enjoyable and valuable project for anyone interes
 - `qemu`
 - `gdb`
 - `make`
+- `cmake`
 - `cross compiler`
 
 ### On Arch Linux
 
 Run the following command to install the required tools:
-`pacman -Syu nasm qemu-full gdb make base-devel gmp libmpc mpfr`
+`pacman -Syu nasm qemu-full gdb make cmake base-devel gmp libmpc mpfr`
 
 #### Setting Up the Cross-Compiler
 
@@ -119,7 +120,13 @@ This allows you to connect a debugger like GDB to debug FunOS step-by-step.
 To load debug information, use the following command in GDB:
 
 ```bash
-add-symbol-file ./cbuild/build/kernelfull.o 0x100000
+add-symbol-file ./cbuild/bin/kernel-debug.elf
+```
+
+If you encounter issues with the ELF debug files, you can alternatively use:
+
+```bash
+add-symbol-file ./cbuild/bin/kernelfull.o 0x100000
 ```
 
 To connect to QEMU with GDB, issue the following command inside GDB:
