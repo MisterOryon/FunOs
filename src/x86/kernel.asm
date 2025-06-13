@@ -39,9 +39,6 @@ _start:
     mov al, 00000001b
     out 0x21, al;
 
-    ; Enable interrupts
-    sti
-
     call CODE_SEG:kernel_main
 
     ; Do nothing more, enter an infinite loop.
