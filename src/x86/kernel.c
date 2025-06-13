@@ -11,7 +11,10 @@
 void kernel_main()
 {
     display_initialize();
+
     idt_initialize();
+    enable_interrupts();
+
     if (kernel_heap_init() < 0)
         goto kernel_init_failed;
 

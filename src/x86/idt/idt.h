@@ -107,4 +107,14 @@ typedef enum : unsigned
  */
 void idt_initialize(void);
 
+/**
+ * @brief Enables hardware interrupts.
+ */
+void enable_interrupts(void);
+
+/**
+ * @brief Disables hardware interrupts.
+ */
+void disable_interrupts(void);
+
 #endif //IDT_H

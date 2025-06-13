@@ -61,3 +61,15 @@ idt_handle_kernel_panic:
     popad
     sti
     iret
+
+; This function sets the interrupt flag, allowing the CPU to respond to hardware interrupts.
+global enable_interrupts
+enable_interrupts:
+    sti
+    ret
+
+; This function clears the interrupt flag, preventing the CPU from responding to hardware interrupts.
+global disable_interrupts
+disable_interrupts:
+    cli
+    ret
