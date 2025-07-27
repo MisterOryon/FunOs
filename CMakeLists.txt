@@ -49,6 +49,7 @@ set(KERNEL_ASM_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/kernel.asm
         ${CMAKE_SOURCE_DIR}/src/x86/idt/idt.asm
         ${CMAKE_SOURCE_DIR}/src/x86/io/io.asm
+        ${CMAKE_SOURCE_DIR}/src/x86/memory/paging.asm
         # Add additional assembly files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.asm
 )
@@ -72,6 +73,7 @@ set(KERNEL_C_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/io/io.c
         ${CMAKE_SOURCE_DIR}/src/x86/heap/heap.c
         ${CMAKE_SOURCE_DIR}/src/x86/heap/kheap.c
+        ${CMAKE_SOURCE_DIR}/src/x86/memory/paging.c
         # Add additional C files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.c
 )
