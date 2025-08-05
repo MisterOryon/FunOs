@@ -30,9 +30,9 @@ enable_paging:
     push ebp
     mov ebp, esp
 
-    ; Enable paging by reading CR0, setting the PG bit (bit 31), and writing back to CR0.
+    ; Enable paging by reading CR0, setting the PG bit (bit 31) and PW (bit 16), then writing back to CR0.
     mov eax, cr0
-    or eax, 0x80000000
+    or eax, 0x80010000
     mov cr0, eax
 
     ; Restore the previous base pointer and clean up the stack frame.

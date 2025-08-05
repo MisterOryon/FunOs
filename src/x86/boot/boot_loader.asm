@@ -119,14 +119,14 @@ load32:
     mov gs, ax
     ; Set up the stack.
     mov ss, ax
-    mov ebp, 0x00200000
+    mov ebp, 0x00400000
     mov esp, ebp
 
     ; Load the kernel.
     ; Start reading at sector 2.
     mov eax, 1
-    ; 512 * 100 = 51,200 bytes to load.
-    mov ecx, 100
+    ; 512 * 192 = 98,304 bytes to load.
+    mov ecx, 192
     ; The address in memory to load the sectors.
     mov edi, 0x00100000
     call ata_lba_read

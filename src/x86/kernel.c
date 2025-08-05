@@ -3,13 +3,13 @@
 //
 #include "kernel.h"
 
-#include <io.h>
 #include <kheap.h>
 #include <paging.h>
+#include <kpaging.h>
 #include <idt/idt.h>
 #include <terminal/print.h>
 
-static struct paging_4gb_chunk* kernel_chunk = 0;
+static struct chunk* kernel_chunk = NULL;
 
 void kernel_main()
 {
@@ -18,16 +18,14 @@ void kernel_main()
     idt_initialize();
     enable_interrupts();
 
-    if (kernel_heap_init() < 0)
-        goto kernel_init_failed;
+    if (kernel_heap_init() < 0) goto kernel_init_failed;
 
-    kernel_chunk = kernel_malloc(sizeof(struct paging_4gb_chunk));
+    kernel_chunk = kernel_malloc(sizeof(struct chunk));
     if (kernel_chunk == NULL) goto kernel_init_failed;
 
-    if (paging_new_4gb(kernel_chunk,PAGING_IS_WRITEABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL) < 0)
-        goto kernel_init_failed;
-
-    paging_switch(kernel_chunk->directory_entry);
+    if (paging_chunk_initialize_directory(kernel_chunk) < 0) goto kernel_init_failed;
+    kernel_paging_init(kernel_chunk);
+    paging_switch(paging_chunk_get_directory(kernel_chunk));
     enable_paging();
 
     console_write_string("Kernel initialization successful!\n");
