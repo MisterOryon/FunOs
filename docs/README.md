@@ -60,6 +60,8 @@ that I need to keep in mind for reference.
   local variables, and program flow control.
 - **[Heap](learning/x86/memory.md#heap)** : Dynamically allocated memory region used for data structures of variable
   size and lifetime.
+- **[MMU](learning/x86/mmu.md)** : The Memory Management Unit handles virtual memory translation through paging address
+  space protection, enable memory access control.
 
 ### Interrupts
 

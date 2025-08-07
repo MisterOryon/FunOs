@@ -25,7 +25,7 @@ _start:
     mov gs, ax
     ; Set up the stack.
     mov ss, ax
-    mov ebp, 0x00200000
+    mov ebp, 0x00400000
     mov esp, ebp
 
     ; Remap the master PIC

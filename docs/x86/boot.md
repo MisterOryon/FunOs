@@ -24,7 +24,7 @@ This process consists of the following key steps:
     - The segment registers are updated to use the newly configured GDT entries for `CODE_SEG` and `DATA_SEG`.
 
 6. **Kernel Loading**
-    - The bootloader reads 51,200 bytes (100 sectors, starting at sector 2) from the master disk.
+    - The bootloader reads 98,304 bytes (192 sectors, starting at sector 2) from the master disk.
     - These are loaded into memory at address `0x00100000` to prepare the kernel for execution.
 
 7. **Execute FunOs kernel**

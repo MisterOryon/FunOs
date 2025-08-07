@@ -10,7 +10,8 @@ Note that FunOs assumes that:
 - The processor is already in protected mode.
 
 After `_start` has setup the environment, it calls `kernel_main` in `kernel.c`.
-The `kernel_main` calls `idt_initialize`, `display_initialize` and `kernel_heap_init` to complete the setup of FunOs.
+The `kernel_main` calls `idt_initialize`, `display_initialize`, `kernel_heap_init` and `kernel_paging_init` to complete
+the setup of FunOs.
 
 ## IDT
 
@@ -27,5 +28,24 @@ After that kernel developers can use `console_write` functions to print messages
 ## Heap
 
 The `kernel_heap_init` function sets up a kernel heap of 104,857,600 bytes (100MB) between memory
-addresses 0x01000000 and 0x08594000.
+addresses 0x01000000 and 0x7400000.
 After that, kernel developers can use `kernel_malloc` and `kernel_free` functions for dynamic memory allocation.
+
+## Paging
+
+The `kernel_paging_init` function configures the kernel memory paging structure according to the following layout:
+
+1. **Real Mode Memory**:
+    - Sets the first 1MB of memory inherited from real mode to read-only.
+    - Exceptions: Kernel heap metadata (0x00008000-0x0000F000) and video memory (0x000B8000-0x000C0000) to read/write.
+
+2. **Kernel Binary Memory**:
+    - .text, .asm, and .rodata sections (0x00100000-0x00108000) to read-only.
+    - .data and .bss sections (0x00108000-0x00118000) to read/write.
+
+3. **Kernel Stack Memory**:
+    - Stack Guard (0x00118000-0x0011A000) to read-only.
+    - Stack (0x0011A000-0x00400000) read/write
+
+4. **Kernel Heap**:
+    - Allocates 25 page tables (100 MB of memory) for the kernel heap (0x01000000-0x07400000) read/write

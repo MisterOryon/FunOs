@@ -49,6 +49,7 @@ set(KERNEL_ASM_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/kernel.asm
         ${CMAKE_SOURCE_DIR}/src/x86/idt/idt.asm
         ${CMAKE_SOURCE_DIR}/src/x86/io/io.asm
+        ${CMAKE_SOURCE_DIR}/src/x86/memory/paging.asm
         # Add additional assembly files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.asm
 )
@@ -72,6 +73,8 @@ set(KERNEL_C_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/io/io.c
         ${CMAKE_SOURCE_DIR}/src/x86/heap/heap.c
         ${CMAKE_SOURCE_DIR}/src/x86/heap/kheap.c
+        ${CMAKE_SOURCE_DIR}/src/x86/memory/paging.c
+        ${CMAKE_SOURCE_DIR}/src/x86/memory/kpaging.c
         # Add additional C files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.c
 )
@@ -150,7 +153,7 @@ add_custom_command(
         COMMAND rm -f ${BIN_DIR}/os.bin
         COMMAND dd if=${BIN_DIR}/boot.bin >> ${BIN_DIR}/os.bin
         COMMAND dd if=${BIN_DIR}/kernel.bin >> ${BIN_DIR}/os.bin
-        COMMAND dd if=/dev/zero bs=512 count=100 >> ${BIN_DIR}/os.bin
+        COMMAND dd if=/dev/zero bs=512 count=192 >> ${BIN_DIR}/os.bin
         DEPENDS ${BIN_DIR}/boot.bin ${BIN_DIR}/kernel.bin
         COMMENT "Creating OS image (os.bin)"
 )

@@ -3,10 +3,13 @@
 //
 #include "kernel.h"
 
-#include <io.h>
 #include <kheap.h>
+#include <paging.h>
+#include <kpaging.h>
 #include <idt/idt.h>
 #include <terminal/print.h>
+
+static struct chunk* kernel_chunk = NULL;
 
 void kernel_main()
 {
@@ -15,36 +18,17 @@ void kernel_main()
     idt_initialize();
     enable_interrupts();
 
-    if (kernel_heap_init() < 0)
-        goto kernel_init_failed;
+    if (kernel_heap_init() < 0) goto kernel_init_failed;
 
-    char* str = kernel_malloc(sizeof(char) * 100);
-    str[0] = 'a';
-    str[1] = 'b';
-    str[2] = 'c';
-    str[3] = '\n';
-    str[4] = '\0';
+    kernel_chunk = kernel_malloc(sizeof(struct chunk));
+    if (kernel_chunk == NULL) goto kernel_init_failed;
 
-    char* str2 = kernel_malloc(sizeof(char) * 10000);
-    str2[0] = 'd';
-    str2[1] = 'e';
-    str2[2] = 'f';
-    str2[3] = '\n';
-    str2[4] = '\0';
+    if (paging_chunk_initialize_directory(kernel_chunk) < 0) goto kernel_init_failed;
+    kernel_paging_init(kernel_chunk);
+    paging_switch(paging_chunk_get_directory(kernel_chunk));
+    enable_paging();
 
-    console_write_string(str);
-    kernel_free(str);
-
-    char* str3 = kernel_malloc(sizeof(char) * 100);
-    str[10] = 'g';
-    str[11] = 'h';
-    str[12] = 'i';
-    str[13] = '\n';
-    str[14] = '\0';
-    kernel_free(str3);
-
-    console_write_string(str2);
-    kernel_free(str2);
+    console_write_string("Kernel initialization successful!\n");
 
     while (1);
 
