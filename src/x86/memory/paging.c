@@ -185,7 +185,7 @@ int paging_set_page_mappings(const struct chunk* chunk,
         goto out;
     }
 
-    if (!paging_is_aligned(virtual_addr_start) | !paging_is_aligned(physical_addr_start) |
+    if (!paging_is_aligned(virtual_addr_start) || !paging_is_aligned(physical_addr_start) ||
         !paging_is_aligned(virtual_addr_end))
     {
         return -EINVAREG;
@@ -327,7 +327,7 @@ int paging_set_directory_entries(const struct chunk* chunk,
         goto out;
     }
 
-    if (!paging_is_aligned(virtual_addr_start) | !paging_is_aligned(virtual_addr_end))
+    if (!paging_is_aligned(virtual_addr_start) || !paging_is_aligned(virtual_addr_end))
     {
         return -EINVAREG;
         goto out;
@@ -457,7 +457,7 @@ int paging_deallocate_directory_entries(const struct chunk* chunk,
         goto out;
     }
 
-    if (!paging_is_aligned(virtual_addr_start) | !paging_is_aligned(virtual_addr_end))
+    if (!paging_is_aligned(virtual_addr_start) || !paging_is_aligned(virtual_addr_end))
     {
         return -EINVAREG;
         goto out;
