@@ -46,6 +46,7 @@ that I need to keep in mind for reference.
 - **[BIOS Call](learning/x86/bios.md#disk-access)**: How the BIOS handles reading from disks.
 - **[ATA Driver](learning/x86/ata.md)**: Details about the driver for ATA (Advanced Technology Attachment) storage
   devices.
+- **[PCI IDE](learning/x86/pci.md#ide-controller)**: Details about the PCI IDE controller for accessing disk data.
 
 ### Processor Modes
 

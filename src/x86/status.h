@@ -5,9 +5,10 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-#define FUNOS_ALL_OK 0
-#define EIO 1
-#define EINVAREG 2
-#define ENOMEN 3
+#define FUNOS_ALL_OK  0
+#define EIO           1
+#define EINVAREG      2
+#define ENOMEN        3
+#define ETIMEDOUT     4
 
 #endif //STATUS_H

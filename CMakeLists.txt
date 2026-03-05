@@ -61,6 +61,7 @@ set(KERNEL_INCLUDE_DIRS
         ${CMAKE_SOURCE_DIR}/src/x86/terminal/
         ${CMAKE_SOURCE_DIR}/src/x86/io/
         ${CMAKE_SOURCE_DIR}/src/x86/heap/
+        ${CMAKE_SOURCE_DIR}/src/x86/disk/
         # Add additional include directories here
 )
 # Define kernel C source files as a list
@@ -75,6 +76,7 @@ set(KERNEL_C_SRC
         ${CMAKE_SOURCE_DIR}/src/x86/heap/kheap.c
         ${CMAKE_SOURCE_DIR}/src/x86/memory/paging.c
         ${CMAKE_SOURCE_DIR}/src/x86/memory/kpaging.c
+        ${CMAKE_SOURCE_DIR}/src/x86/disk/disk.c
         # Add additional C files here
         # ${CMAKE_SOURCE_DIR}/src/x86/another_file.c
 )
