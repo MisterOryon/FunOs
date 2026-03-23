@@ -174,7 +174,7 @@ static disk_type_t detectDiskType(const bool secondaryChan)
 
 int funos::disk::searchAndInitialize()
 {
-    int result = FUNOS_ALL_OK;
+    int res = FUNOS_ALL_OK;
 
     unsigned short identifyBuffer[256];
     bool isPresent = false;
@@ -187,15 +187,15 @@ int funos::disk::searchAndInitialize()
             memory::memset(identifyBuffer, 0, sizeof(unsigned short) * 256);
             currantDisk = &gIdeDevices[ataChannel * 2 + drivePosition];
 
-            result = readIndentify(ataChannel, drivePosition, &isPresent, identifyBuffer);
-            if (result < 0)
+            res = readIndentify(ataChannel, drivePosition, &isPresent, identifyBuffer);
+            if (res < 0)
             {
                 // TODO:
                 // We assume that if en error occur during reade the second channel of ATA PIC,
                 // This is due to the absence of device that disable second channel.
                 //
                 // I future work we need to chack if the second channel of ATA PIC is available.
-                if (ataChannel != 1 && result != -EIO) return result;
+                if (ataChannel != 1 && res != -EIO) return res;
             }
 
             // No disk connects to this cable.
