@@ -22,12 +22,11 @@ using namespace funos::heap;
  */
 static int validateHeapTable(const void* ptr, const void* end, const HeapTable* table)
 {
-    int res = FUNOS_ALL_OK;
     const size_t tableSize = reinterpret_cast<uintptr_t>(end) - reinterpret_cast<uintptr_t>(ptr);
     const size_t totalBlocks = tableSize / FUNOS_HEAP_BLOCK_SIZE;
 
-    if (table->total != totalBlocks) res = -EINVAREG;
-    return res;
+    if (table->total != totalBlocks) return -EINVAREG;
+    return FUNOS_ALL_OK;
 }
 
 /**
@@ -65,7 +64,7 @@ static size_t roundUpToBlockSize(size_t value)
  */
 static void* getBlockAddress(const Heap* heap, const size_t block)
 {
-    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(heap->start_addr) + (block * FUNOS_HEAP_BLOCK_SIZE));
+    return reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(heap->startAddr) + (block * FUNOS_HEAP_BLOCK_SIZE));
 }
 
 /**
@@ -78,7 +77,7 @@ static void* getBlockAddress(const Heap* heap, const size_t block)
 static size_t getBlockIndex(const struct Heap* heap, const void* address)
 {
     return reinterpret_cast<uintptr_t>(
-        (reinterpret_cast<uintptr_t>(address) - reinterpret_cast<uintptr_t>(heap->start_addr)) / FUNOS_HEAP_BLOCK_SIZE
+        (reinterpret_cast<uintptr_t>(address) - reinterpret_cast<uintptr_t>(heap->startAddr)) / FUNOS_HEAP_BLOCK_SIZE
     );
 }
 
@@ -93,7 +92,6 @@ static size_t getBlockIndex(const struct Heap* heap, const void* address)
  */
 static int getFreeBlockRange(size_t* startBlock, const Heap* heap, const size_t totalBlocks)
 {
-    int res = FUNOS_ALL_OK;
     const HeapTable* table = heap->table;
     bool foundFreeBlock = false;
     size_t bc = 0;
@@ -118,8 +116,8 @@ static int getFreeBlockRange(size_t* startBlock, const Heap* heap, const size_t 
         if (++bc == totalBlocks) break;
     }
 
-    if (!foundFreeBlock || bc != totalBlocks) res = -ENOMEN;
-    return res;
+    if (!foundFreeBlock || bc != totalBlocks) return -ENOMEN;
+    return FUNOS_ALL_OK;
 }
 
 /**
@@ -203,12 +201,12 @@ int funos::heap::create(Heap* heap, void* ptr, const void* end, HeapTable* table
     if (res < 0) return res;
 
     memory::memset(heap, 0, sizeof(struct Heap));
-    heap->start_addr = ptr;
+    heap->startAddr = ptr;
     heap->table = table;
 
     const size_t tableSize = sizeof(block_table_entry_t) * table->total;
     memory::memset(table->entries, 0, tableSize);
-    return res;
+    return FUNOS_ALL_OK;
 }
 
 void* funos::heap::malloc(const Heap* heap, const size_t size)
@@ -227,7 +225,7 @@ void* funos::heap::malloc(const Heap* heap, const size_t size)
 
 int funos::heap::free(const Heap* heap, const void* ptr)
 {
-    if (heap == nullptr || ptr == nullptr || ptr < heap->start_addr) return -EINVAREG;
+    if (heap == nullptr || ptr == nullptr || ptr < heap->startAddr) return -EINVAREG;
 
     const size_t startBlock = getBlockIndex(heap, ptr);
     if (startBlock >= heap->table->total) return -EINVAREG;

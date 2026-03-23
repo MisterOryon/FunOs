@@ -38,7 +38,7 @@ namespace funos
         struct Heap
         {
             HeapTable* table; // Pointer to the metadata table that tracks block allocation.
-            void* start_addr; // Base address of the heap's memory region.
+            void* startAddr; // Base address of the heap's memory region.
         };
 
         /**

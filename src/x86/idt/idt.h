@@ -41,11 +41,11 @@ namespace funos
         // It defines the address of the interrupt handler and its associated attributes.
         struct IdtEntry
         {
-            uint16_t offset_low; // Lower 16 bits of the interrupt handler's address.
+            uint16_t offsetLow; // Lower 16 bits of the interrupt handler's address.
             uint16_t selector; // Segment selector for the code segment in the GDT.
             uint8_t reserved; // Must always be zero (reserved for alignment).
-            uint8_t type_attr; // Attributes of the interrupt gate (e.g., type, privilege level, present bit).
-            uint16_t offset_high; // Higher 16 bits of the interrupt handler's address.
+            uint8_t typeAttr; // Attributes of the interrupt gate (e.g., type, privilege level, present bit).
+            uint16_t offsetHigh; // Higher 16 bits of the interrupt handler's address.
         } __attribute__((packed)); // Ensures the structure's layout is not altered by compiler padding.
 
         // Represents an IDE descriptor of the location and size of the IDT.

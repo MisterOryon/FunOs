@@ -86,7 +86,7 @@ static void registerInterruptHandler(const exception_vector_t vector, void* addr
     IdtEntry* desc = &gIdtEntries[vector];
 
     // Set the lower 16 bits of the handler address.
-    desc->offset_low = reinterpret_cast<uint32_t>(address) & IDT_OFFSET_LOW_MASK;
+    desc->offsetLow = reinterpret_cast<uint32_t>(address) & IDT_OFFSET_LOW_MASK;
 
     desc->selector = KERNEL_CODE_SELECTOR;
     desc->reserved = 0x00;
@@ -95,10 +95,10 @@ static void registerInterruptHandler(const exception_vector_t vector, void* addr
     // - Present (P) bit: 1 (the handler is valid).
     // - Descriptor Privilege Level (DPL): 11 (privilege level 3, allows user-level access).
     // - Gate type: 1110 (interrupt gate).
-    desc->type_attr = 0xEE;
+    desc->typeAttr = 0xEE;
 
     // Set the higher 16 bits of the handler address.
-    desc->offset_high = reinterpret_cast<uint32_t>(address) >> IDT_OFFSET_HIGH_SHIFT;
+    desc->offsetHigh = reinterpret_cast<uint32_t>(address) >> IDT_OFFSET_HIGH_SHIFT;
 }
 
 void funos::irq::initialize()

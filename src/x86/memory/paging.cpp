@@ -174,10 +174,10 @@ int funos::memory::mmu::initializePageDirectoryEntries(const Chunk* chunk,
             reinterpret_cast<void*>(reinterpret_cast<uint32_t>(virtualAddrStart) + addressOffset),
             flags
         );
-        if (res < 0) break;
+        if (res < 0) return res;
         addressOffset += (PAGING_TOTAL_ENTRIES_PER_TABLE * PAGING_PAGE_SIZE);
     }
-    return res;
+    return FUNOS_ALL_OK;
 }
 
 int funos::memory::mmu::setPageMapping(const Chunk* chunk,
@@ -236,10 +236,10 @@ int funos::memory::mmu::setPagesMapping(const Chunk* chunk,
             reinterpret_cast<void*>(reinterpret_cast<uint32_t>(virtualAddrStart) + addressOffset),
             reinterpret_cast<void*>(reinterpret_cast<uint32_t>(physicalAddrStart) + addressOffset),
             flags);
-        if (res < 0) break;
+        if (res < 0) return res;
         addressOffset += PAGING_PAGE_SIZE;
     }
-    return res;
+    return FUNOS_ALL_OK;
 }
 
 int funos::memory::mmu::getPageMapping(const Chunk* chunk,
@@ -333,8 +333,8 @@ int funos::memory::mmu::freePageDirectoryEntries(const Chunk* chunk,
             chunk,
             reinterpret_cast<void*>(reinterpret_cast<uint32_t>(virtualAddrStart) + addressOffset)
         );
-        if (res < 0) break;
+        if (res < 0) return res;
         addressOffset += (PAGING_TOTAL_ENTRIES_PER_TABLE * PAGING_PAGE_SIZE);
     }
-    return res;
+    return FUNOS_ALL_OK;
 }

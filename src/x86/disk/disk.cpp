@@ -101,7 +101,6 @@ static int readIndentify(
     // Check if a device is present (status register != 0).
     if (funos::io::inb(ataPort + ATA_REG_STATUS) == 0) return FUNOS_ALL_OK;
 
-
     // Poll until the ATA controller is ready to send IDENTIFY data.
     while (true)
     {

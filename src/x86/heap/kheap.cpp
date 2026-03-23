@@ -4,6 +4,8 @@
 
 #include "kheap.h"
 
+#include <status.h>
+
 #include "config.h"
 #include "heap.h"
 #include "print.h"
@@ -13,7 +15,7 @@ funos::heap::HeapTable gKernelHeapTable;
 
 int funos::kheap::initialize()
 {
-    int res = 0;
+    int res = FUNOS_ALL_OK;
     constexpr size_t totalTableEntries = FUNOS_HEAP_SIZE_BYTES / FUNOS_HEAP_BLOCK_SIZE;
     void* start = reinterpret_cast<void*>((FUNOS_HEAP_ADDRESS));
     const void* end = reinterpret_cast<void*>((FUNOS_HEAP_ADDRESS + FUNOS_HEAP_SIZE_BYTES));
@@ -22,8 +24,12 @@ int funos::kheap::initialize()
     gKernelHeapTable.total = totalTableEntries;
 
     res = heap::create(&gKernelHeap, start, end, &gKernelHeapTable);
-    if (res < 0) console::writeString("Failed to create kernel heap!\n");
-    return res;
+    if (res < 0)
+    {
+        console::writeString("Failed to create kernel heap!\n");
+        return res;
+    }
+    return FUNOS_ALL_OK;
 }
 
 void* funos::kheap::malloc(const size_t size)
