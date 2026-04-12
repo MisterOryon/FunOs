@@ -167,3 +167,4 @@ development:
 - Thanks to the authors of **osdev.org**, a great resource for learning the specifics of kernel development.
 - Thanks to the author of **www.ctyme.com**, a great place to find information about a comprehensive list of available
   BIOS functions.
+- Thanks to **hddguru.com/** for hosting the ATA/ATAPI disk documentation.
